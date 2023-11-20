@@ -1,0 +1,39 @@
+/* FrontPage.css */
+
+/* Style for the main container of the FrontPage component */
+.FrontPage-container {
+    /* background-color: #ffffff9c; */
+    padding: 20px;
+    text-align: center;
+   
+  }
+  
+  /* Style for the title */
+  .FrontPage-title {
+    font-size: 4rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* Style for the main content */
+  .FrontPage-content {
+    font-size: 2rem;
+    color: #f31616;
+    font-weight: 700;
+  }
+  
+  /* Style for buttons or any other elements specific to the FrontPage */
+  .FrontPage-button {
+    background-color: #1a3dd8;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  
+  .FrontPage-button:hover {
+    background-color: #0e2756;
+  }
+  

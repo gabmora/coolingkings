@@ -1,0 +1,42 @@
+/* DatePicker.css */
+
+/* Style for the calendar container */
+.react-datepicker {
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  /* Style for the calendar header */
+  .react-datepicker__header {
+    background-color: #1a3dd8;
+    color: white;
+    border: none;
+  }
+  
+  /* Style for the navigation buttons in the calendar header */
+  .react-datepicker__navigation {
+    border: none;
+    color: white;
+    background-color: transparent;
+    font-size: 1.5rem;
+  }
+  
+  /* Style for the calendar days */
+  .react-datepicker__day {
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  /* Style for the selected date */
+  .react-datepicker__day--selected {
+    background-color: #1a3dd8;
+    color: white;
+  }
+  
+  /* Style for the today's date */
+  .react-datepicker__day--today {
+    font-weight: bold;
+  }
+  
