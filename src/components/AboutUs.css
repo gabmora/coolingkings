@@ -4,14 +4,20 @@
     align-items: center;
     justify-content: space-around;
     flex-wrap: wrap;
-    background-image: url(https://chillsairconditioning.com/wp-content/uploads/2023/07/How-Long-Do-Commercial-HVAC-Systems-Last-.jpg);
+    /* background-image: url(https://chillsairconditioning.com/wp-content/uploads/2023/07/How-Long-Do-Commercial-HVAC-Systems-Last-.jpg); */
     background-size: cover;
     background-repeat: no-repeat;
   }
 
   .column h5{
     font-size: 15px;
-    /* color:#007bff; */
+    color:#007bff;
+    margin-bottom: 1%;
+    
+  }
+  h5{
+    font-size: 15px;
+    color:#007bff;
     margin-bottom: 1%;
     
   }
@@ -26,7 +32,7 @@
       margin: 5px; /* Add margin for spacing */
       width: 45%;
       background-color: rgb(252, 206, 155);
-      border-radius: 42px;
+      /* border-radius: 42px; */
   }
 
   .row {

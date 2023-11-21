@@ -59,7 +59,7 @@ function BookingPage() {
   };
   return (
     <div className="BookingPage-container">
-      <h1>Book an Appointment</h1>
+      <h1>SERVICE REQUEST</h1>
       <form className="BookingPage-form" onSubmit={sendEmail}>
         <div>
           <label htmlFor="name"></label>

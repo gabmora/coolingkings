@@ -10,10 +10,11 @@ function Header() {
           <img src={logo} alt="logo" />
         </div>
       </Link>
-      {/* <div className="header-title">Cooling Kings HVAC</div> */}
       <nav className="header-nav">
-        <Link to="/BookingPage" className="nav-link">Book an Appointment</Link>
-        <Link to="/AboutUs" className="nav-link">About Us</Link>
+        <Link to="/AC" className="nav-link">AIR CONDITIONER</Link>
+        <Link to="/Heating" className="nav-link">HEATING</Link>
+        <Link to="/BookingPage" className="nav-link">REQUEST A SERVICE</Link>
+        
       </nav>
     </header>
   );
