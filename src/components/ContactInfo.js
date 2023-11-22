@@ -4,7 +4,7 @@ import './FrontPage.css';
 function ContactInfo() {
   return (
     <>
-    <div className="row">
+    <div className="contactRow">
       <div className="ContactInfo-phone">
         <h2><a href="tel:(312) 961-4664">(312) 961-4664</a></h2>
         <p>Call to schedule, or to learn more about our heating and cooling services. </p>

@@ -1,8 +1,14 @@
+.main-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Make sure the content stretches to at least the full viewport height */
+}
 
 body {
     background-color: #000000; /* Replace with your desired background color */
     margin: 0; /* Remove default margin to ensure full coverage */
     padding: 0; /* Remove default padding */
+
   }
   
 
@@ -51,13 +57,10 @@ body {
     text-decoration: underline;
   }
   
-  .main-content {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Make sure the content stretches to at least the full viewport height */
-  }
   
   footer {
+    position: relative;
+    bottom: 0;
     margin-top: auto;
     background-color: #333;
     color: #fff;
