@@ -1,0 +1,54 @@
+/* ACInfo.css */
+
+.ACInfo-container {
+    padding: 20px;
+    text-align: center;
+    color: aliceblue;
+  }
+  
+  .ACInfo-introduction {
+    margin-bottom: 30px;
+    text-align: left;
+  }
+  
+  .ACInfo-benefits,
+  .ACInfo-types {
+    margin-bottom: 40px;
+    text-align: left;
+  }
+  
+  .ACInfo-types {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .ACInfo-type {
+    max-width: 300px;
+    margin-bottom: 20px;
+  }
+  
+  .ACInfo-image {
+    margin-bottom: 40px;
+  }
+  
+  .ACInfo-image img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  .ACInfo-cta {
+    background-color: #1a3dd8;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+  }
+  
+  .ACInfo-cta h2 {
+    margin-bottom: 20px;
+  }
+  
+ 

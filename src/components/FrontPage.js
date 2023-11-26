@@ -18,11 +18,12 @@ function FrontPage() {
       <div className="row">
         <figure className="image-figure"> {/* Add a class for styling */}
           <img className="acimage" src={acImage} alt="HVAC system" />
-          <figcaption>Reddi HVAC services all makes and models of air conditioners and cooling systems. Residential and commercial service. Typically same-day AC repairs. Serving the Wichita, KS area.</figcaption>
+          <figcaption>Reddi HVAC services all makes and models of air conditioners and cooling systems. Residential and commercial service. Typically same-day AC repairs. Serving the Wichita, KS area.We’re here to help with all of your heating needs. We work on all furnace brands. We also install and repair thermostats, heat pumps, ductless min-splits, and geothermal systems.</figcaption>
         </figure>
         <figure className="image-figure"> {/* Add a class for styling */}
-          <img className="frontpageimage" src={heatingImage} alt="Heating" />
-          <figcaption>We’re here to help with all of your heating needs. We work on all furnace brands. We also install and repair thermostats, heat pumps, ductless min-splits, and geothermal systems.</figcaption>
+          {/* <img className="frontpageimage" src={heatingImage} alt="Heating" /> */}
+            <iframe className="image-figure"src="https://www.google.com/maps/d/embed?mid=10rgyoD9J5jcrE1fHftglIfIldKIYpBs&ehbc=2E312F&noprof=1"></iframe>
+          <figcaption>Serving the Low Country Area</figcaption>
         </figure>
       </div>
     </>

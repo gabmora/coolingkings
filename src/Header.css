@@ -50,7 +50,7 @@
     min-height: 100vh; /* Make sure the content stretches to at least the full viewport height */
   }
   
-  footer {
+  footer {  
     margin: auto;
     background-color: #333;
     color: #fff;
