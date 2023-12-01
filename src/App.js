@@ -13,8 +13,8 @@ import './App.css';
 function App() {
   return (
     <Router>
-      <div className="main-content">
         <Header/> 
+      <div className="main-content">
         <Routes>
           <Route path="/BookingPage" element={<BookingPage />} />
           <Route path="/Heating" element={<Heating />} />
@@ -22,7 +22,7 @@ function App() {
           <Route path="/*" element={<FrontPage />} />
         </Routes>
       </div>
-      <Footer/>
+        <Footer/>
     </Router>
   );
 }
