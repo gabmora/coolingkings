@@ -8,6 +8,7 @@ html, body {
     /* background-color: #ffffff9c; */
     padding: 20px;
     text-align: center;
+    /* display: flex; */
    
   }
   
@@ -43,13 +44,7 @@ html, body {
   .FrontPage-button:hover {
     background-color: #0e2756;
   }
-/* FrontPage.css */
-.row{
-  display: flex;
-  justify-content: space-between; 
-  align-items: flex-start; 
 
-}
 .contactRow {
   display: flex;
   justify-content: space-between;
@@ -95,36 +90,37 @@ html, body {
 
 
 .image-figure {
-  width: 50%; /* Adjust the width as needed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
   height: 300px; /* Set a fixed height */ 
-  display: inline-block; 
-  text-align: center; /* Center the content */
-  box-sizing: border-box; 
+  /* display: inline-block;  */
+  text-align: center; 
+  /* box-sizing: border-box;  */
 }
 
-.acimage,
-.frontpageimage {
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; /* Maintain aspect ratio and cover the entire container */
-  max-height:100%;
+.acimage, .frontpageimage {
+  object-fit: cover; /* Maintain aspect ratio */
+  width: 300px;
+  height: 300px;
   border-color: #ffffff;
   border-width: 15px;
   border-style: solid;
+
 }
 
 .figcaption {
   font-style: italic;
   margin-top: 5px;
   color: #ffffff;
+  text-align: center;
 }
 
 .figure {
   text-align: left;
 }
-.image-figure {
-  position: relative;
-}
+
 figcaption {
   font-style: italic;
   margin-top: 5px;
@@ -132,7 +128,7 @@ figcaption {
   position: center;
   bottom: 0; /* Adjust as needed */
   width: 100%;
-  background-color: rgba(19, 17, 17, 0.8); /* Add a semi-transparent background */
+  /* background-color: rgba(19, 17, 17, 0.8); Add a semi-transparent background */
   text-align: center;
   /* margin: 0; */
 }

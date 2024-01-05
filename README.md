@@ -11,8 +11,11 @@ In the project directory, you can run:
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### `npm install react-router-dom`
+### `npm install react-datepicker`
+### `npm install emailjs-com`
+### `npm install react@latest react-dom@latest`
+### `npm install web-vitals`
 
 ### `npm test`
 

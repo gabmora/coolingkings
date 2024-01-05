@@ -15,20 +15,26 @@ function FrontPage() {
         <p className='FrontPage-content'>At Cooling Kings, we specialize in delivering premium HVAC services designed to create the perfect indoor environment for your home or business. With a commitment to excellence and customer satisfaction, we offer a comprehensive range of heating, ventilation, and air conditioning solutions.</p>
       </div>
       
-      <div className="row">
-        <figure className="image-figure"> {/* Add a class for styling */}
-          <img className="acimage" src={acImage} alt="HVAC system" />
-          <figcaption>Reddi HVAC services all makes and models of air conditioners and cooling systems. Residential and commercial service. Typically same-day AC repairs. Serving the Wichita, KS area.We’re here to help with all of your heating needs. We work on all furnace brands. We also install and repair thermostats, heat pumps, ductless min-splits, and geothermal systems.</figcaption>
-        </figure>
-        <figure className="image-figure"> {/* Add a class for styling */}
-          {/* <img className="frontpageimage" src={heatingImage} alt="Heating" /> */}
-            <iframe className="image-figure"src="https://www.google.com/maps/d/embed?mid=10rgyoD9J5jcrE1fHftglIfIldKIYpBs&ehbc=2E312F&noprof=1"></iframe>
-          <figcaption>Serving the Low Country Area</figcaption>
-        </figure>
+      <figure> 
+        <img className="acimage" src={acImage} alt="HVAC system" />
+        <div class="reviews-container">
+          <h2>Customer Reviews</h2>
+          <div id="google-reviews"> </div>
+          <a href="YOUR_GOOGLE_MY_BUSINESS_LINK" target="_blank" class="review-cta-button">Leave Us a Review on Google</a>
+        <figcaption>CK HVAC services all makes and models of air conditioners and cooling systems. Residential and commercial service. Typically same-day AC repairs. Serving the LowCountry, SC area. We’re here to help with all of your heating needs. We work on all furnace brands. We also install and repair thermostats, heat pumps, ductless min-splits, and geothermal systems.</figcaption>
       </div>
-      <div className='FrontPage-container'>
-        <p className='FrontPage-text'>We offer a wide range of services including:</p>
+
+      </figure>
+
+      <div className="FrontPage-container">
+          <figure className="image-figure"> 
+            <img className="frontpageimage" src={heatingImage} alt="Heating" />
+              <iframe className="frontpageimage"src="https://www.google.com/maps/d/embed?mid=10rgyoD9J5jcrE1fHftglIfIldKIYpBs&ehbc=2E312F&noprof=1"></iframe>
+          </figure>
+          
       </div>
+      
+      
     </>
   );
 }
