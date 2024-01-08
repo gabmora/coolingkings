@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Front-End React App 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -11,14 +11,16 @@ In the project directory, you can run:
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
+Install necessary dependancies:
 ### `npm install react-router-dom`
 ### `npm install react-datepicker`
 ### `npm install emailjs-com`
 ### `npm install react@latest react-dom@latest`
 ### `npm install web-vitals`
 
-### `npm test`
 
+
+### `npm test`
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
