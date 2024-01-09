@@ -45,10 +45,14 @@
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 40px;
+    text-align: center;
   }
   
   .ACInfo-cta h2 {
     margin-bottom: 20px;
   }
   
- 
+ p{
+  font-size: 2.5em;
+  text-align: center;
+ }

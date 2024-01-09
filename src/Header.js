@@ -12,7 +12,7 @@ function Header() {
       </Link>
       <nav className="header-nav">
         <Link to="/AC" className="nav-link">AIR CONDITIONER</Link>
-        <Link to="/Heating" className="nav-link">HEATING</Link>
+        {/* <Link to="/Heating" className="nav-link">HEATING</Link> */}
         <Link to="/BookingPage" className="nav-link">REQUEST A SERVICE</Link>
         
       </nav>

@@ -8,8 +8,18 @@ function AC() {
   return (
     <div className="ACInfo-container">
       <section className="ACInfo-introduction">
+      <section className="ACInfo-image">
+        <img src={acImage} alt="AC System" />
+        <p>Our advanced AC systems ensure reliable and efficient cooling.</p>
+      </section>
+
+      <section className="ACInfo-cta">
+        <h2>Ready to Upgrade Your Comfort?</h2>
+        <h3>Contact us today to explore our AC solutions and enhance your indoor environment.</h3>
+        {/* Add a button or link for the CTA */}
+      </section>
         <h1>AC Solutions</h1>
-        <p>24/7 AC repair in the Wichita area. Flat rates and comprehensive warranties.</p>
+        <p>24/7 AC repair in the Low Country area. Flat rates and comprehensive warranties.</p>
       </section>
 
       <section className="ACInfo-benefits">
@@ -32,33 +42,23 @@ function AC() {
       </section>
 
       <section className="ACInfo-types">
-        <h2>Types of AC Systems</h2>
+        {/* <h2>Types of AC Systems</h2> */}
         <div className="ACInfo-type">
           <h3>Central AC</h3>
-          <p>Efficiently cools the entire home using a centralized system.</p>
+          <h4>Efficiently cools the entire home using a centralized system.</h4>
         </div>
         <div className="ACInfo-type">
           <h3>Split AC</h3>
-          <p>Allows for cooling individual rooms or zones.</p>
+          <h4>Allows for cooling individual rooms or zones.</h4>
         </div>
         <div className="ACInfo-type">
           <h3>Window Units</h3>
-          <p>Perfect for cooling single rooms and easy to install.</p>
+          <h4>Perfect for cooling single rooms and easy to install.</h4>
         </div>
       </section>
 
       {/* Add more sections for installation, maintenance, energy efficiency, etc. */}
 
-      <section className="ACInfo-image">
-        <img src={acImage} alt="AC System" />
-        <p>Our advanced AC systems ensure reliable and efficient cooling.</p>
-      </section>
-
-      <section className="ACInfo-cta">
-        <h2>Ready to Upgrade Your Comfort?</h2>
-        <p>Contact us today to explore our AC solutions and enhance your indoor environment.</p>
-        {/* Add a button or link for the CTA */}
-      </section>
     </div>
   );
 }
