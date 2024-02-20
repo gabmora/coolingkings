@@ -1,15 +1,15 @@
 // Footer.js
 
 import React from 'react';
-import './Header.css'; // Import the CSS file
 import ContactInfo from './components/ContactInfo';
+import './Footer.css'; 
 
 function Footer() {
   return (
     <footer>
       <div className="container">
         <ContactInfo/>
-        <p>&copy; 2023 Cooling Kings HVAC. All rights reserved.</p>
+        <p>&copy; 2024 K&E HVAC. All rights reserved.</p>
       </div> 
     </footer>
   );

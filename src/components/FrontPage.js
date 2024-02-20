@@ -10,16 +10,21 @@ function FrontPage() {
   return (
     <>
       <div className="FrontPage-container">
-        <h1 className='FrontPage-title'>Welcome to Cooling Kings HVAC</h1>
-        <h2 className='FrontPage-subtitle'>HEATING AND COOLING SERVICE IN THE LOW COUNTRY</h2>
-        <p className='FrontPage-content'>At Cooling Kings, we specialize in delivering premium HVAC services designed to create the perfect indoor environment for your home or business. With a commitment to excellence and customer satisfaction, we offer a comprehensive range of heating, ventilation, and air conditioning solutions.</p>
+        <section className='into-block'>
+          <p> </p>
+        </section>
+        <section className='intro-block'>
+          <h1 className='FrontPage-title'>Welcome to K&E HVAC</h1>
+          <h2 className='FrontPage-subtitle'>HEATING AND COOLING SERVICE IN THE LOW COUNTRY</h2>
+          <h3 className='FrontPage-content'>At K&E HVAC, we specialize in delivering premium HVAC services designed to create the perfect indoor environment for your home or business. With a commitment to excellence and customer satisfaction, we offer a comprehensive range of heating, ventilation, and air conditioning solutions.</h3>
+        </section>
       </div>
       
       <div className="FrontPage-container">
-          <figure className="image-figure"> 
+          {/* <figure className="image-figure"> 
             <img className="frontpageimage" src={heatingImage} alt="Heating" />
               <iframe className="frontpageimage"src="https://www.google.com/maps/d/embed?mid=10rgyoD9J5jcrE1fHftglIfIldKIYpBs&ehbc=2E312F&noprof=1"></iframe>
-          </figure>
+          </figure> */}
           
       
         <div class="reviews-container">
