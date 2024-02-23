@@ -22,7 +22,7 @@
     /* border: 1px solid #999; */
     padding: 10px;
     margin: 1px;
-    text-align: left;
+    text-align: center;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -34,7 +34,7 @@
   .ContactInfo-email h2,
   .ContactInfo-chatnow h2 {
     /* margin-bottom: 1px; */
-    margin: 0;
+    margin: 1;
     font-weight:100;
     font-size: large;
   }
@@ -43,14 +43,14 @@
   .ContactInfo-email p,
   .ContactInfo-chatnow p {
     margin: 0;
-    text-align: left;
+    text-align: center;
     font-weight:bold;
     font-size: larger;
   }
   
   .ContactInfo-phone {
     margin: auto;
-    align-items: center;
+    align-items: left;
     
     
     

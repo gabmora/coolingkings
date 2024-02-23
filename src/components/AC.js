@@ -1,8 +1,8 @@
 // src/components/ACInfo.js
 
 import React from 'react';
-import './AC.css'; // Import your CSS
-import acImage from './images/HVAC-system.jpg'; // Import your AC image
+import './AC.css';
+import acImage from './images/HVAC-system.jpg'; 
 
 function AC() {
   return (

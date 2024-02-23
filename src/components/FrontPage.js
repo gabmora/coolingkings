@@ -30,8 +30,8 @@ function FrontPage() {
         <div class="reviews-container">
           <h2>Customer Reviews</h2>
           <div id="google-reviews"> </div>
-          <a href="YOUR_GOOGLE_MY_BUSINESS_LINK" target="_blank" class="review-cta-button">Leave Us a Review on Google</a>
-        <figcaption>CK HVAC services all makes and models of air conditioners and cooling systems. Residential and commercial service. Typically same-day AC repairs. Serving the LowCountry, SC area. We’re here to help with all of your heating needs. We work on all furnace brands. We also install and repair thermostats, heat pumps, ductless min-splits, and geothermal systems.</figcaption>
+          <a href="https://www.google.com/search?q=my+business&mat=CdE0ELzdG9aQEkwB7PxHsWkuNwFfJWLnoXR0jfP5eH0N57XjqTlPQ2l0lq66WCla9Hg7IEG3MmeuSGIZCdSYAGtIGI5n4LDpPAp4636XyJwj5_kJJpOI&hl=en&authuser=0" target="_blank" class="review-cta-button">Leave Us a Review on Google</a>
+        <figcaption>K&E HVAC services all makes and models of air conditioners and cooling systems. Residential and commercial service. Typically same-day AC repairs. Serving the LowCountry, SC area. We’re here to help with all of your heating needs. We work on all furnace brands. We also install and repair thermostats, heat pumps, ductless min-splits, and geothermal systems.</figcaption>
       </div>
       </div>
       

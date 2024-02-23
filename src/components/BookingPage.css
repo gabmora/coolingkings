@@ -1,7 +1,8 @@
 
 .BookingPage-container {
-  background-image: url('https://marketplace.canva.com/EAD2962NKnQ/2/0/1600w/canva-rainbow-gradient-pink-and-purple-virtual-background-_Tcjok-d9b4.jpg');
+  /* background-image: url('https://marketplace.canva.com/EAD2962NKnQ/2/0/1600w/canva-rainbow-gradient-pink-and-purple-virtual-background-_Tcjok-d9b4.jpg'); */
   padding: 20px;
+  background-color: #98a6e4;
   text-align: center;
   width: 500px;
   height: 500px;
@@ -11,7 +12,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-radius: 40px; /* Rounded corners */
+  border-radius: 30px; /*Rounded corners */
 }
 
   .BookingPage-form {

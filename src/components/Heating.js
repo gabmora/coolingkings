@@ -1,4 +1,3 @@
-// Heating.js
 import React from 'react';
 import './AboutUs.css';
 
