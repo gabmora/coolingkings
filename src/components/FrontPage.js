@@ -2,8 +2,7 @@ import React from 'react';
 import './FrontPage.css';
 
 // Import your images using the import statement
-import acImage from './images/HVAC-system.jpg';
-import heatingImage from './images/heating.jpeg';
+// import acImage from './images/HVAC-system.jpg';
 
 function FrontPage() {
   console.log('FrontPage component rendered');
