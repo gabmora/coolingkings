@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/coolingkings/static/css/main.104cedde.css",
+    "main.js": "/coolingkings/static/js/main.c5a3cf8a.js",
+    "static/js/787.87a263d4.chunk.js": "/coolingkings/static/js/787.87a263d4.chunk.js",
+    "static/media/heating.jpeg": "/coolingkings/static/media/heating.02f59328b21f43e62291.jpeg",
+    "static/media/coolingkings.png": "/coolingkings/static/media/coolingkings.bf82b8995e73990fb057.png",
+    "static/media/HVAC-system.jpg": "/coolingkings/static/media/HVAC-system.3d6cab9f6e75e35c5b99.jpg",
+    "index.html": "/coolingkings/index.html",
+    "main.104cedde.css.map": "/coolingkings/static/css/main.104cedde.css.map",
+    "main.c5a3cf8a.js.map": "/coolingkings/static/js/main.c5a3cf8a.js.map",
+    "787.87a263d4.chunk.js.map": "/coolingkings/static/js/787.87a263d4.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.104cedde.css",
+    "static/js/main.c5a3cf8a.js"
+  ]
+}
