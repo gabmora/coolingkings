@@ -7,10 +7,10 @@ function Heating() {
     console.log('Heating component is rendering.');
     return (
         <>
+        <img className="frontpageimage" src={heatingImage} alt="Heating" />
         <h5>heating</h5>
         <h1>we fix heat stuff too.</h1>
         
-        <img className="frontpageimage" src={heatingImage} alt="Heating" />
         
         
         </> 
