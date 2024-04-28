@@ -1,4 +1,8 @@
-<<!DOCTYPE html>
+
+
+export const heatingHtml = `
+  <!-- Paste the content of heating.html here -->
+  <<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -125,22 +129,7 @@
     text-align: left;
     font-weight: bold;
   }
-  /* Footer styles */
-  .footer {
-    background-color: #343a40; /* Dark Gray */
-    color: #ffffff;
-    text-align: center;
-    padding: 20px 0;
-    width: 100%;
-    clear: both; /* Clear float */
-    position: relative; /* Relative positioning */
-    bottom: 0; /* Stick to the bottom */
-  }
-  .plan {
-      /* Other styles */
-      background-image: url('metallic_texture.jpg'); /* Path to your metallic texture image */
-      background-repeat: repeat; /* Repeat the texture */
-    }
+  
 </style>
 </head>
 <body>
@@ -168,7 +157,7 @@
               <li class="plan-feature"><i class="fas fa-check-circle"></i> Technician will perform various checks and inspections</li>
             </ul>
           </div>
-          <a href="#" class="btn btn-primary btn-block">Schedule Now</a>
+
         </div>
       </div>
       <div class="col-md-4">
@@ -186,7 +175,7 @@
               <li class="plan-feature"><i class="fas fa-check-circle"></i> Additional checks and inspections by the technician</li>
             </ul>
           </div>
-          <a href="#" class="btn btn-primary btn-block">Schedule Now</a>
+          
         </div>
       </div>
       <div class="col-md-4">
@@ -205,7 +194,7 @@
               <li class="plan-feature"><i class="fas fa-check-circle"></i> Priority status for emergency service calls</li>
             </ul>
           </div>
-          <a href="#" class="btn btn-primary btn-block">Schedule Now</a>
+          
         </div>
       </div>
     </div>
@@ -269,11 +258,9 @@
     </div>
   </div>
   
-  <!-- Scripts -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </body>
-  </html>
+  `;
+
   
-  
+export default heatingHtml;
+
+

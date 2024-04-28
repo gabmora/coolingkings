@@ -4,7 +4,7 @@ import FrontPage from './components/FrontPage';
 import BookingPage from './components/BookingPage';
 // import AboutUs from './components/AboutUs'; 
 import AC from './components/AC';
-import {heatingHtml} from './components/Heating';
+import MaintenancePlan from './components/MaintenancePlan';
 import Header from './Header'; 
 import Footer from './Footer';
 
@@ -18,14 +18,14 @@ function App() {
       <div className="main-content">
         <Routes>
           <Route path="/BookingPage" element={<BookingPage />} />
-          {/* <Route path="/Heating" element={<Heating />} /> */}
-          {/* <Route path="/AC" element={<AC />} /> */}
+          <Route path="/MaintenacePlan" element={<MaintenancePlan />} />
+          <Route path="/AC" element={<AC />} />
           <Route path="/*" element={<FrontPage />} />
         </Routes>
       </div>
-        <div dangerouslySetInnerHTML={{ __html: heatingHtml }} />
-        <Footer/>
+      <Footer/> 
     </Router>
+
   );
 }
 

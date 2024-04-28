@@ -111,8 +111,9 @@ function BookingPage() {
             required
           >
             <option value="">Select an option</option>
-            <option value="Initial Consultation">Initial Consultation</option>
-            <option value="Follow Up">Follow Up</option>
+            <option value="Essential">Essential</option>
+            <option value="Advanced">Advanced</option>
+            <option value="Premium">Premium</option>
           </select>
         </div>
         <div>

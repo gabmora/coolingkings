@@ -1,5 +1,5 @@
 .header {
-  background-color: #98a6e4;
+  background-color: #153ff8;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -43,7 +43,7 @@
 }
 
 .nav-link:hover {
-  text-decoration: underline;
+  text-decoration:underline;
 }
 
 .main-content {

@@ -34,15 +34,15 @@ function Header() {
         </div>
       </Link>
       <nav className="header-nav">
-        <div className="dropdown">
-          {/* <button className="dropbtn" onClick={toggleDropdown}>Services</button> */}
+        {/* <div className="dropdown">
+          <button className="dropbtn" onClick={toggleDropdown}>Services</button>
           {isDropdownOpen && (
             <div className="dropdown-content">
               <Link to="/AC" className="nav-link">AC</Link>
-              <Link to="/Heating" className="nav-link">Heating</Link>
             </div>
-          )}
-        </div>
+        </div> */}
+
+          <Link to="/MaintenacePlan" className="nav-link">Maintenace Plans</Link>
           <Link to="/BookingPage" className="nav-link">Contact Us</Link>
       </nav>
     </header>

@@ -62,4 +62,19 @@
   
   
   
-  
+  /* Footer styles from keats htmls*/
+  .footer {
+    background-color: #343a40; /* Dark Gray */
+    color: #ffffff;
+    text-align: center;
+    padding: 20px 0;
+    width: 100%;
+    clear: both; /* Clear float */
+    position: relative; /* Relative positioning */
+    bottom: 0; /* Stick to the bottom */
+  }
+  .plan {
+      /* Other styles */
+      /* background-image: url('metallic_texture.jpg');  */
+      background-repeat: repeat; /* Repeat the texture */
+    }
