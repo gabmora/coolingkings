@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from './coolingkings.png'; 
+import logo from './images/coolingkings.png'; 
 import './Header.css'; 
 
 function Header() {
