@@ -1,104 +1,78 @@
 .header {
-  background-color: #153ff8;
+  background-color: #002f6c; /* Same as footer */
+  color: white;
+  padding: 10px 0; /* Similar padding as footer */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.header-container {
+  max-width: 1200px; /* Similar max-width as footer */
+  width: 100%;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1px;
-  color: rgb(255, 255, 255);
 }
 
-.header-title {
-  font-size: 42px;
-  font-weight: bold;
-}
-
-.header-logo {
-  width: 100px; 
-  height: auto;
+.logo-link {
+  display: flex;
+  align-items: center;
 }
 
 .header-logo img {
-  max-width: 100%;
-  height: auto;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .header-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  max-width: 150px;
 }
 
 .header-nav {
-  margin-right: 20px;
   display: flex;
   align-items: center;
 }
 
 .nav-link {
+  color: #00ff99; /* Match the phone number color in the footer */
   text-decoration: none;
-  color: white;
-  margin-left: 20px;
-  font-weight: bold;
-  font-size: 1.1rem;
+  margin: 0 10px;
 }
 
 .nav-link:hover {
-  text-decoration:underline;
-}
-
-.main-content {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Make sure the content stretches to at least the full viewport height */
-}
-
-footer {  
-  margin: auto;
-  background-color: #000000;
-  color: #fff;
-  padding: 20px 0;
-  text-align: center;
+  text-decoration: underline;
 }
 
 .dropdown {
   position: relative;
-}
-
-.dropdown-content {
-  position: absolute;
-  left: 0;
-  top: 100%; /* Place the dropdown content below the dropdown button */
-  background-color: #4e3737;
-  padding: .75rem;
-  border-radius: .25rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, .25);
-  opacity: 0;
-  transition: opacity 150ms ease-in-out;
-  display: flex;
-  flex-direction: column; /* Display dropdown items in a column */
-}
-
-.dropdown:hover > .dropdown-content {
-  opacity: 1;
+  display: inline-block;
 }
 
 .dropbtn {
-  background-color: #4CAF50; 
-  color: white; /* White text color */
-  padding: 12px; /* Padding */
-  font-size: 16px; /* Font size */
-  border: none; /* No border */
-  cursor: pointer; /* Cursor style */
+  background-color: #7ed321; /* Match the button color in the footer */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
 }
 
-.dropbtn:hover {
-  background-color: #45a049; /* Darker green hover color */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #002f6c; /* Match the background color */
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
 }
 
-.dropbtn:focus {
-  outline: none; /* Remove outline */
+.dropdown-content .nav-link {
+  color: #00ff99; /* Match the phone number color in the footer */
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
 }
 
-.dropbtn:active {
-  background-color: #3e8e41; /* Active color */
+.dropdown-content .nav-link:hover {
+  background-color: #7ed321; /* Match the button hover color */
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
 }

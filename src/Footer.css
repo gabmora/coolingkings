@@ -1,80 +1,95 @@
-.container{
-    text-align: center;
+.footer {
+  background-color: #002f6c;
+  color: white;
+  padding: 2px 0;
+  width: 100%;
+  /* display: flex; */
+  justify-content: center;
 }
 
-.copyright{
-    font-size: medium;
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 10px;
+  /* display: flex; */
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
-.contactRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    margin: 0;
-    
-  }
-  
-  .ContactInfo-phone,
-  .ContactInfo-email,
-  .ContactInfo-chatnow {
-    flex: 1;
-    background-color: #020202;
-    /* border: 1px solid #999; */
-    padding: 10px;
-    margin: 1px;
-    text-align: center;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    
-  }
-  
-  
-  .ContactInfo-phone h2,
-  .ContactInfo-email h2,
-  .ContactInfo-chatnow h2 {
-    /* margin-bottom: 1px; */
-    margin: 1;
-    font-weight:100;
-    font-size: large;
-  }
-  
-  .ContactInfo-phone p,
-  .ContactInfo-email p,
-  .ContactInfo-chatnow p {
-    margin: 0;
-    text-align: center;
-    font-weight:bold;
-    font-size: larger;
-  }
-  
-  .ContactInfo-phone {
-    margin: auto;
-    align-items: left;
-    
-    
-    
-  }
-  
-  .ContactInfo-chatnow {
-    margin: auto;
-  }
-  
-  
-  
-  /* Footer styles from keats htmls*/
-  .footer {
-    background-color: #343a40; /* Dark Gray */
-    color: #ffffff;
-    text-align: center;
-    padding: 20px 0;
-    width: 100%;
-    clear: both; /* Clear float */
-    position: relative; /* Relative positioning */
-    bottom: 0; /* Stick to the bottom */
-  }
-  .plan {
-      /* Other styles */
-      /* background-image: url('metallic_texture.jpg');  */
-      background-repeat: repeat; /* Repeat the texture */
-    }
+.footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;
+  margin: 10px 0; /* Reduce top and bottom margin */
+  padding: 10px; /* Add padding inside the column */
+  text-align: left;
+}
+
+.footer-column h2,
+.footer-column a,
+.footer-column address,
+.footer-column button {
+  margin: 10px 0; /* Add margin to space out elements */
+}
+
+.footer-logo {
+  max-width: 150px;
+}
+
+.footer-phone {
+  font-size: 1.2em;
+  color: #00ff99;
+}
+
+.footer-button {
+  background-color: #7ed321;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+.footer-social {
+  display: flex;
+  gap: 10px;
+}
+
+.footer-social-link {
+  font-size: 1.5em;
+  color: #00ff99;
+  text-decoration: none;
+}
+
+.footer-payments img {
+  max-width: 50px;
+  margin: 5px;
+}
+
+.footer ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.footer li {
+  margin: 5px 0;
+}
+
+.footer a {
+  color: #00ff99;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  text-align: center;
+  margin-top: 2px;
+  font-size: small;
+}

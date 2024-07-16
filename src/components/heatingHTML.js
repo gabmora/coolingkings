@@ -253,7 +253,7 @@ export const heatingHtml = `
             </tr>
           </tbody>
         </table>
-        <p class="text-center"><a href="#" class="btn btn-primary">Choose Your Plan</a></p>
+        
       </div>
     </div>
   </div>

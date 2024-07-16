@@ -12,29 +12,7 @@ body {
   }
   
 
-.header {
-    background-color: #98a6e4;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1px;
-    color: white;
-  }
-  .header-title{
-    font-size: 42px;
-    font-weight: bold;
 
-  }
-  .header-logo {
-    width: 100px; 
-    height: auto;
-  }
-  
-  .header-logo img {
-    max-width: 100%;
-    height: auto;
-  }
-  
   @media (prefers-reduced-motion: no-preference) {
     .header-logo {
       animation: App-logo-spin infinite 20s linear;
@@ -57,15 +35,7 @@ body {
     text-decoration: underline;
   }  
   
-  .footer {
-    position: fixed;
-    bottom: 0;
-    /* margin-top: auto; */
-    background-color: #333;
-    color: #fff;
-    padding: 20px 0;
-    text-align: center;
-  }
+  
   
   .contact-info{
     border-radius: 4px; /* Rounded corners */

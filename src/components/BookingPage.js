@@ -121,7 +121,7 @@ function BookingPage() {
           <DatePicker
             id="selectedDate"
             name="selectedDate"
-            className="BookingPage-datepicker"
+            className="react-datepicker"
             selected={formData.selectedDate}
             onChange={handleDateChange}
             showTimeSelect

@@ -18,7 +18,7 @@ function App() {
       <div className="main-content">
         <Routes>
           <Route path="/BookingPage" element={<BookingPage />} />
-          <Route path="/MaintenacePlan" element={<MaintenancePlan />} />
+          <Route path="/MaintenancePlan" element={<MaintenancePlan />} />
           <Route path="/AC" element={<AC />} />
           <Route path="/*" element={<FrontPage />} />
         </Routes>

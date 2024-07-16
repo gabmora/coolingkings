@@ -1,115 +1,110 @@
-/* FrontPage.css */
 html, body {
   height: 100%;
   margin: 0;
+  font-family: Arial, sans-serif; /* Ensuring a clean font for the body */
+}
+
+.hero-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Aligning text to the left */
+  background-size: cover;
+  background-position: center;
+  height: 400px;
+  color: white;
+  padding: 20px;
+  background-image: url('./images/HVAC-system.jpg'); /* Fallback for the image */
+}
+
+.hero-content {
+  max-width: 50%;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5); /* Adding a dark overlay for readability */
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.hero-button {
+  background-color: transparent;
+  color: white;
+  padding: 10px 20px;
+  border: 2px solid white; /* Outline button */
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.hero-button:hover {
+  background-color: white;
+  color: #002f6c; /* Matching the footer/header color */
 }
 
 .FrontPage-container {
-    background: 
-        linear-gradient(to right, transparent, black), /* Gradient effect */
-        url(https://st2.depositphotos.com/1058411/12264/i/450/depositphotos_122640292-stock-photo-closeup-of-male-technician-repairing.jpg) center center / cover no-repeat; /* Background image */
-
-    /* background-image: url(https://st2.depositphotos.com/1058411/12264/i/450/depositphotos_122640292-stock-photo-closeup-of-male-technician-repairing.jpg); */
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;  
-    text-align: right;
-    display:block;
-  }
-  
-  .intro-block{
-    /* padding: 10px; */
-    /* margin: 10px; */
-    text-align: left;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    max-width: 500px;
-    margin-bottom: 20px;
-    margin-left: auto;
-  }
-
-  .FrontPage-title {
-    font-size: auto;
-    color: #ff0000; /* #bf292b */
-    margin-bottom: 20px;
-  }
-  .FrontPage-subtitle {
-    font-size: auto;
-    color: #ffffff;
-    font-weight: 700;
-  }
-  
-  .FrontPage-content {
-    font-size: auto;
-    color: #ffffff;
-    font-weight: 400;
-  }
-  
-  /* Style for buttons or any other elements specific to the FrontPage */
-  .FrontPage-button {
-    background-color: #1a3dd8;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1rem;
-    cursor: pointer;
-  }
-  
-  .FrontPage-button:hover {
-    background-color: #0e2756;
-  }
-
-.image-figure {
+  background: white; /* Setting background to white */
+  padding: 20px; /* Adding padding for spacing */
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 80px;
-  height: auto; /* Set a fixed height */ 
-  /* display: inline-block;  */
-  text-align: center; 
-  /* box-sizing: border-box;  */
+  justify-content: center; /* Centering content */
+  align-items: center; /* Centering content */
+  flex-direction: column; /* Stacking content vertically */
 }
 
-.acimage, .frontpageimage {
-  object-fit:cover;
-  display: flex;
-  width: auto;
-  height:300px;
-  /* border-color: #ffffff; */
-  /* border-width: 15px; */
-  /* border-style: solid; */
-
+.intro-block {
+  text-align: center; /* Centering text */
+  max-width: 800px; /* Limiting the width of the text block */
+  margin-bottom: 20px; /* Adding some space below */
 }
 
-.figcaption {
-  font-style: italic;
-  margin-top: 5px;
-  color: #ffffff;
-  text-align: center;
+.FrontPage-title {
+  font-size: 2.5rem; /* Responsive font size */
+  color: #002f6c; /* Matching the footer/header color */
+  margin-bottom: 20px;
 }
 
-.figure {
-  text-align: left;
+.FrontPage-subtitle {
+  font-size: 1.5rem; /* Responsive font size */
+  color: #7ed321; /* Complementary color */
+  font-weight: 700;
+  margin-bottom: 20px;
 }
 
-figcaption {
-  font-style: italic;
-  margin-top: 5px;
-  color:#ffffff;
-  position: center;
-  bottom: 0; /* Adjust as needed */
-  width: 100%;
-  /* background-color: rgba(19, 17, 17, 0.8); Add a semi-transparent background */
-  text-align: center;
-  /* margin: 0; */
+.FrontPage-content {
+  font-size: 1.2rem; /* Responsive font size */
+  color: #333333; /* Darker color for readability */
+  font-weight: 400;
+  margin-bottom: 20px;
 }
 
+.info-container {
+  background-color: #f5f5f5; /* Light grey background for contrast */
+  padding: 20px;
+  border-radius: 10px; /* Rounded corners for a softer look */
+  max-width: 800px; /* Limiting the width */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adding a subtle shadow for depth */
+}
 
-.reviews-container {
-  padding: 2% 6%;
-  text-align: center;
-  background-color: #1a3dd8;
+.info-container h2 {
+  color: #002f6c; /* Matching the header/footer color */
+  margin-bottom: 10px;
+}
+
+.info-container p {
+  color: #333333; /* Darker color for readability */
+  margin-bottom: 15px;
 }
