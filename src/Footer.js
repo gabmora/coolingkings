@@ -8,7 +8,7 @@ function Footer() {
         <div className="footer-row">
           <div className="footer-column">
             <h2>Serving the Low Country</h2>
-            <a href="tel:866-784-1732" className="footer-phone">866-784-1732</a>
+            <a href="tel:201-844-3508" className="footer-phone">201-844-3508</a>
             <address>
               730 Broad St.<br />
               Bluffton, SC 29936<br />
@@ -23,17 +23,15 @@ function Footer() {
               <li><a href="/reviews">Reviews</a></li>
               <li><a href="/AboutUs">About Us</a></li>
               <li><a href="/service-areas">Service Areas</a></li>
-              <li><a href="/blog">Blog</a></li>
             </ul>
           </div>
           <div className="footer-column">
             <h3>&nbsp;</h3>
             <ul>
               <li><a href="/heating">Heating</a></li>
-              <li><a href="/plumbing-drains">Plumbing & Drains</a></li>
-              <li><a href="/Heating">Maintenance Plan</a></li>
+              <li><a href="/MaintenancePlan">Maintenance Plan</a></li>
               <li><a href="/careers">Careers</a></li>
-              <li><a href="/contact">Contact</a></li>
+              <li><a href="/BookingPage">Contact</a></li>
               <li><a href="/coupons">Coupons</a></li>
             </ul>
           </div>

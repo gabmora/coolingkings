@@ -6,7 +6,7 @@ function AboutUs() {
     <div className="about-us">
         <div className="column">
           <h3>Our Mission</h3>
-          <p> Whether it's a residential property, commercial space, or industrial facility, Cooling Kings is dedicated to providing superior HVAC solutions that prioritize your comfort, health, and peace of mind.
+          <p> Whether it's a residential property, commercial space, or industrial facility, K&E HVAC is dedicated to providing superior HVAC solutions that prioritize your comfort, health, and peace of mind.
             Contact us today to discuss your HVAC needs and experience the difference of working with a dedicated team committed to ensuring your indoor environment is nothing short of perfect.</p> 
           {/* <h3>Our Team</h3> */}
         </div>

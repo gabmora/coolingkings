@@ -23,12 +23,15 @@ function Header() {
             <button className="dropbtn" onClick={toggleDropdown}>Services</button>
             {isDropdownOpen && (
               <div className="dropdown-content">
-                <Link to="/AC" className="nav-link">AC</Link>
-                <Link to="/MaintenancePlan" className="nav-link">Maintenance Plan</Link>
+                <Link to="/MaintenancePlan" className="nav-link">Maintenance Plans</Link>
+                <Link to="/AC" className="nav-link">Cooling</Link>
+                <Link to="/AC" className="nav-link">Heating</Link>
               </div>
             )}
           </div>
-          <Link to="/BookingPage" className="nav-link">Contact Us</Link>
+          <Link to="/BookingPage" className="nav-link">
+            <button className="dropbtn">Contact Us</button>
+          </Link>
         </nav>
       </div>
     </header>
