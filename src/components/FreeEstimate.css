@@ -1,0 +1,324 @@
+/* FreeEstimate.css - Matching the style of the modernized FrontPage */
+
+/* Using the same variable system from FrontPage.css for consistency */
+:root {
+    /* Color variables */
+    --primary-color: #0056b3;
+    --secondary-color: #004494;
+    --accent-color: #ff6b00;
+    --text-color: #333333;
+    --light-text: #ffffff;
+    --background-color: #f8f9fa;
+    --border-color: #dddddd;
+    --success-color: #28a745;
+    
+    /* Spacing variables */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 4rem;
+    --spacing-xl: 6rem;
+    
+    /* Font sizes */
+    --font-size-small: 0.875rem;
+    --font-size-normal: 1rem;
+    --font-size-medium: 1.25rem;
+    --font-size-large: 1.5rem;
+    --font-size-xl: 2rem;
+    --font-size-xxl: 3rem;
+  }
+  
+  /* Hero section specific to the estimate page */
+  .estimate-hero {
+    position: relative;
+    height: 300px;
+    background-color: var(--secondary-color);
+    background-image: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--light-text);
+  }
+  
+  .estimate-hero__content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    padding: var(--spacing-md);
+  }
+  
+  .estimate-hero__title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .estimate-hero__description {
+    font-size: var(--font-size-medium);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Form section styles */
+  .estimate-form-section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--background-color);
+  }
+  
+  .estimate-form-wrapper {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: var(--spacing-lg);
+    background-color: var(--light-text);
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .estimate-form-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .estimate-form__title {
+    font-size: var(--font-size-large);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+  }
+  
+  .estimate-form__subtitle {
+    font-size: var(--font-size-normal);
+    color: var(--text-color);
+    margin-bottom: var(--spacing-md);
+    opacity: 0.8;
+  }
+  
+  .estimate-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .form-group label {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    color: var(--text-color);
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: var(--font-size-normal);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  }
+  
+  .form-submit {
+    margin-top: var(--spacing-md);
+  }
+  
+  /* Success message */
+  .form-success {
+    text-align: center;
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+  
+  .form-success h2 {
+    font-size: var(--font-size-xl);
+    color: var(--success-color);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .form-success p {
+    font-size: var(--font-size-medium);
+    margin-bottom: var(--spacing-lg);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Form image side */
+  .estimate-form-image {
+    position: relative;
+  }
+  
+  .estimate-form-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .estimate-benefits {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 68, 148, 0.9);
+    color: var(--light-text);
+    padding: var(--spacing-md);
+  }
+  
+  .estimate-benefits h3 {
+    font-size: var(--font-size-medium);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .estimate-benefits ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .estimate-benefits li {
+    padding: var(--spacing-xs) 0;
+    position: relative;
+    padding-left: var(--spacing-md);
+  }
+  
+  .estimate-benefits li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--accent-color);
+    font-weight: bold;
+  }
+  
+  /* Process section */
+  .estimate-info {
+    padding: var(--spacing-xl) 0;
+    background-color: #f0f5ff;
+  }
+  
+  .estimate-info h2 {
+    font-size: var(--font-size-large);
+    color: var(--secondary-color);
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .estimate-process {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+  }
+  
+  .process-step {
+    text-align: center;
+    position: relative;
+  }
+  
+  .process-number {
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent-color);
+    color: var(--light-text);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    margin: 0 auto var(--spacing-sm);
+  }
+  
+  .process-step h3 {
+    font-size: var(--font-size-medium);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .process-step p {
+    font-size: var(--font-size-normal);
+    color: var(--text-color);
+  }
+  
+  /* Button styles - reused from FrontPage.css */
+  .button {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: 4px;
+    font-size: var(--font-size-normal);
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+  }
+  
+  .button--primary {
+    background-color: var(--accent-color);
+    color: var(--light-text);
+  }
+  
+  .button--primary:hover {
+    background-color: #e85f00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 992px) {
+    .estimate-form-wrapper {
+      grid-template-columns: 1fr;
+    }
+    
+    .estimate-benefits {
+      position: relative;
+    }
+    
+    .estimate-process {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-lg) var(--spacing-md);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .estimate-hero {
+      height: 250px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .estimate-process {
+      grid-template-columns: 1fr;
+    }
+    
+    .estimate-form-content {
+      padding: var(--spacing-md);
+    }
+    
+    .estimate-form-section {
+      padding: var(--spacing-md) 0;
+    }
+    
+    .estimate-info {
+      padding: var(--spacing-md) 0;
+    }
+  }
