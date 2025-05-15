@@ -54,11 +54,27 @@ const CustomerList = () => {
   }, [searchTerm, customers]);
 
   return (
+    
     <div className="admin-container">
+        <div className="admin-header">
+            <h1>Work Order Details</h1>
+            <div>
+                <button 
+                className="btn btn-secondary" 
+                style={{ marginRight: '10px' }}
+                >
+                Dashboard
+                </button>
+                
+            </div>
+            </div>
       <div className="admin-header">
         <h1>Customer Management</h1>
         <Link to="/admin/customers/new" className="btn btn-primary">
           Add New Customer
+        </Link>
+        <Link to="/admin" className="btn btn-secondary">
+          Dashboard
         </Link>
       </div>
       

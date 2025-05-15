@@ -702,3 +702,12 @@
     font-size: 12px;
     color: #6c757d;
   }
+
+  .map-link {
+    color: #4285F4;
+    text-decoration: underline;
+  }
+  
+  .map-link:hover {
+    text-decoration: none;
+  }

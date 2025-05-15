@@ -275,3 +275,15 @@
     display: flex;
   }
 }
+
+/* Add this to your main CSS file */
+body {
+  padding-top: 72px; /* Adjust this value based on your header height */
+}
+
+/* For responsive design, you might need different padding for mobile */
+@media (max-width: 768px) {
+  body {
+    padding-top: 61px; /* Adjust for mobile header height */
+  }
+}

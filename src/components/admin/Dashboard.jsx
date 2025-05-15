@@ -16,6 +16,8 @@ const Dashboard = () => {
     completedThisMonth: 0,
   });
   const [loading, setLoading] = useState(true);
+  // Add a new state to toggle the visibility of in-progress orders section
+  const [showInProgressOrders, setShowInProgressOrders] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,7 +32,7 @@ const Dashboard = () => {
         const inProgress = await getWorkOrdersByStatus('in-progress');
         setInProgressWorkOrders(inProgress);
         
-        // Fetch today's work orders
+        // Fetch today's work orders - Fix for today's schedule
         const today = new Date().toISOString().split('T')[0];
         const { data: todaysOrders } = await supabase
           .from('work_orders')
@@ -46,7 +48,13 @@ const Dashboard = () => {
           .eq('service_date', today)
           .order('time_preference');
         
-        setTodaysWorkOrders(todaysOrders || []);
+        // Make sure we have valid data before setting the state
+        if (todaysOrders && Array.isArray(todaysOrders)) {
+          setTodaysWorkOrders(todaysOrders);
+        } else {
+          setTodaysWorkOrders([]);
+          console.error('Unexpected format for today\'s orders:', todaysOrders);
+        }
         
         // Fetch general stats
         const { count: customerCount } = await supabase
@@ -113,6 +121,11 @@ const Dashboard = () => {
     }
   };
 
+  // Toggle function for in-progress section
+  const toggleInProgressOrders = () => {
+    setShowInProgressOrders(!showInProgressOrders);
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
@@ -131,13 +144,17 @@ const Dashboard = () => {
         <div className="loading">Loading dashboard data...</div>
       ) : (
         <>
-          {/* Stats Row */}
+          {/* Stats Row - Make in-progress card clickable */}
           <div className="dashboard-stats">
             <div className="stat-card">
               <div className="stat-value">{pendingWorkOrders.length}</div>
               <div className="stat-label">Pending Orders</div>
             </div>
-            <div className="stat-card">
+            <div 
+              className="stat-card clickable" 
+              onClick={toggleInProgressOrders}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="stat-value">{inProgressWorkOrders.length}</div>
               <div className="stat-label">In Progress</div>
             </div>
@@ -170,6 +187,68 @@ const Dashboard = () => {
               <span>Customer List</span>
             </Link>
           </div>
+
+          {/* In Progress Work Orders - Show only when clicked */}
+          {showInProgressOrders && (
+            <div className="dashboard-section">
+              <div className="section-header">
+                <h2>In Progress Work Orders</h2>
+                <Link to="/admin/workorders?status=in-progress" className="btn btn-text">
+                  View All
+                </Link>
+              </div>
+              
+              <div className="card">
+                {inProgressWorkOrders.length === 0 ? (
+                  <div className="empty-state">
+                    <p>No work orders in progress.</p>
+                  </div>
+                ) : (
+                  <div className="work-order-list">
+                    {inProgressWorkOrders.slice(0, 5).map(order => (
+                      <div key={order.id} className="work-order-item">
+                        <div className="work-order-header">
+                          <h3>{order.title}</h3>
+                          <div className="date-badge">{formatDate(order.service_date)}</div>
+                        </div>
+                        <div className="work-order-details">
+                          <div className="detail-row">
+                            <div className="detail-label">Customer:</div>
+                            <div className="detail-value">{order.customers.name}</div>
+                          </div>
+                          <div className="detail-row">
+                            <div className="detail-label">Service Type:</div>
+                            <div className="detail-value">{order.service_type.charAt(0).toUpperCase() + order.service_type.slice(1)}</div>
+                          </div>
+                          <div className="detail-row">
+                            <div className="detail-label">Started:</div>
+                            <div className="detail-value">{order.started_at ? new Date(order.started_at).toLocaleString() : 'N/A'}</div>
+                          </div>
+                        </div>
+                        <div className="work-order-actions">
+                          <button 
+                            className="btn btn-primary btn-sm" 
+                            onClick={() => navigate(`/admin/workorders/${order.id}`)}
+                          >
+                            View Details
+                          </button>
+                          <button 
+                            className="btn btn-success btn-sm"
+                            onClick={() => {
+                              // This would update the status to completed
+                              navigate(`/admin/workorders/${order.id}/complete`);
+                            }}
+                          >
+                            Complete Job
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           
           {/* Today's Schedule */}
           <div className="dashboard-section">

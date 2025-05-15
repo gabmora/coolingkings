@@ -1,17 +1,12 @@
 // components/admin/WorkOrderForm.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { searchCustomers, createCustomer } from '../../services/customerService';
 import { createWorkOrder } from '../../services/workOrderService';
-import { supabase } from '../../services/supabase';
-import '../admin/AdminStyles.css';
+import './AdminStyles.css';
 
 const WorkOrderForm = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const customerId = queryParams.get('customer');
-  
   const [formData, setFormData] = useState({
     title: '',
     service_date: formatDate(new Date()),
@@ -52,37 +47,6 @@ const WorkOrderForm = () => {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-  
-  // Check if customer ID is in URL and fetch customer data
-  useEffect(() => {
-    const fetchCustomerById = async () => {
-      if (customerId) {
-        try {
-          const { data, error } = await supabase
-            .from('customers')
-            .select('*')
-            .eq('id', customerId)
-            .single();
-          
-          if (error) {
-            console.error('Error fetching customer:', error);
-            return;
-          }
-          
-          if (data) {
-            setSelectedCustomer(data);
-            setCustomerSearch(data.name);
-          }
-        } catch (error) {
-          console.error('Error in fetchCustomerById:', error);
-        }
-      }
-    };
-    
-    if (customerId) {
-      fetchCustomerById();
-    }
-  }, [customerId]);
   
   // Handle clicks outside of search results to close dropdown
   useEffect(() => {
@@ -162,10 +126,7 @@ const WorkOrderForm = () => {
       // Create the work order
       const workOrderData = {
         ...formData,
-        customer_id: customerId,
-        status: 'pending',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        customer_id: customerId
       };
       
       const createdWorkOrder = await createWorkOrder(workOrderData);
@@ -212,7 +173,6 @@ const WorkOrderForm = () => {
                     placeholder="Start typing customer name or phone..."
                     className="form-control"
                     autoComplete="off"
-                    disabled={selectedCustomer !== null}
                   />
                   
                   {showResults && searchResults.length > 0 && (
@@ -240,23 +200,21 @@ const WorkOrderForm = () => {
                   )}
                 </div>
                 
-                {!selectedCustomer && (
-                  <div className="mt-2">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={() => {
-                        setShowNewCustomerForm(true);
-                        setNewCustomer(prev => ({
-                          ...prev,
-                          name: customerSearch // Populate name field with search text
-                        }));
-                      }}
-                    >
-                      + Add New Customer
-                    </button>
-                  </div>
-                )}
+                <div className="mt-2">
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => {
+                      setShowNewCustomerForm(true);
+                      setNewCustomer(prev => ({
+                        ...prev,
+                        name: customerSearch // Populate name field with search text
+                      }));
+                    }}
+                  >
+                    + Add New Customer
+                  </button>
+                </div>
                 
                 {selectedCustomer && (
                   <div className="selected-customer mt-3">
@@ -269,16 +227,6 @@ const WorkOrderForm = () => {
                         <p><strong>Notes:</strong> {selectedCustomer.notes}</p>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => {
-                        setSelectedCustomer(null);
-                        setCustomerSearch('');
-                      }}
-                    >
-                      Change Customer
-                    </button>
                   </div>
                 )}
               </div>
@@ -549,3 +497,4 @@ const WorkOrderForm = () => {
 };
 
 export default WorkOrderForm;
+

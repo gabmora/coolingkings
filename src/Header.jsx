@@ -43,6 +43,7 @@ const Header = () => {
   }, [isOpen, mobileMenu]);
 
   return (
+    
     <header className={`header ${scrolled ? 'header-scrolled' : ''}`}>
       <div className="header-container">
         <Link to="/" className="logo-container">

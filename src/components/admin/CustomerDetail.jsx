@@ -11,6 +11,7 @@ const CustomerDetail = () => {
   const [workOrders, setWorkOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -20,7 +21,17 @@ const CustomerDetail = () => {
     state: '',
     zip: '',
     type: '',
-    notes: ''
+    notes: '',
+    // HVAC equipment fields
+    has_indoor_unit: false,
+    has_outdoor_unit: false,
+    unit_brand: '',
+    unit_model: '',
+    unit_serial: '',
+    install_date: '',
+    refrigerant_type: '',
+    tonnage: '',
+    photos: []
   });
   
   useEffect(() => {
@@ -42,7 +53,18 @@ const CustomerDetail = () => {
         }
         
         setCustomer(customerData);
-        setFormData(customerData);
+        setFormData({
+          ...customerData,
+          has_indoor_unit: customerData.has_indoor_unit || false,
+          has_outdoor_unit: customerData.has_outdoor_unit || false,
+          unit_brand: customerData.unit_brand || '',
+          unit_model: customerData.unit_model || '',
+          unit_serial: customerData.unit_serial || '',
+          install_date: customerData.install_date || '',
+          refrigerant_type: customerData.refrigerant_type || '',
+          tonnage: customerData.tonnage || '',
+          photos: customerData.photos || []
+        });
         
         // Fetch related work orders
         const { data: workOrderData, error: workOrderError } = await supabase
@@ -96,8 +118,67 @@ const CustomerDetail = () => {
       alert('An unexpected error occurred');
     }
   };
+
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    
+    if (files.length === 0) return;
+    
+    setUploadStatus('Uploading...');
+    
+    try {
+      const uploadedUrls = [];
+      
+      for (const file of files) {
+        // Create a unique file path in the storage bucket
+        const filePath = `customers/${id}/${Date.now()}_${file.name}`;
+        
+        // Upload file to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('customerphotos')
+          .upload(filePath, file);
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Get the public URL for the uploaded file
+        const { data: urlData } = supabase.storage
+          .from('customer_photos')
+          .getPublicUrl(filePath);
+        
+        uploadedUrls.push(urlData.publicUrl);
+      }
+      
+      // Update the form data with the new photos
+      setFormData(prev => ({
+        ...prev,
+        photos: [...(prev.photos || []), ...uploadedUrls]
+      }));
+      
+      setUploadStatus('Uploaded successfully');
+      
+      // Clear the status after a few seconds
+      setTimeout(() => {
+        setUploadStatus('');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      setUploadStatus(`Upload failed: ${error.message}`);
+    }
+  };
+  
+  const removePhoto = (index) => {
+    setFormData(prev => {
+      const updatedPhotos = [...prev.photos];
+      updatedPhotos.splice(index, 1);
+      return { ...prev, photos: updatedPhotos };
+    });
+  };
   
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -117,11 +198,41 @@ const CustomerDetail = () => {
     }
   };
 
+  const deleteCustomer = async () => {
+    if (window.confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+      try {
+        const { error } = await supabase
+          .from('customers')
+          .delete()
+          .eq('id', id);
+        
+        if (error) {
+          alert('Error deleting customer: ' + error.message);
+          return;
+        }
+        
+        // Redirect back to customers list
+        navigate('/admin/customers');
+        
+      } catch (error) {
+        console.error('Error in deleteCustomer:', error);
+        alert('An unexpected error occurred');
+      }
+    }
+  };
+
   return (
     <div className="admin-container">
       <div className="admin-header">
         <h1>Customer Details</h1>
         <div>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => navigate('/admin')}
+            style={{ marginRight: '10px' }}
+          >
+            Dashboard
+          </button>
           <button 
             className="btn btn-secondary" 
             onClick={() => navigate('/admin/customers')}
@@ -266,6 +377,179 @@ const CustomerDetail = () => {
                     rows="3"
                   ></textarea>
                 </div>
+
+                {/* HVAC Equipment Section */}
+                <div className="section">
+                  <h3>HVAC Equipment Details</h3>
+                  
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Equipment Type</label>
+                      <div className="checkbox-group">
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={formData.has_indoor_unit}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              has_indoor_unit: e.target.checked
+                            }))}
+                          />
+                          Indoor Unit
+                        </label>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={formData.has_outdoor_unit}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              has_outdoor_unit: e.target.checked
+                            }))}
+                          />
+                          Outdoor Unit
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="unit_brand">Brand</label>
+                      <input
+                        type="text"
+                        id="unit_brand"
+                        name="unit_brand"
+                        className="form-control"
+                        value={formData.unit_brand}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="unit_model">Model Number</label>
+                      <input
+                        type="text"
+                        id="unit_model"
+                        name="unit_model"
+                        className="form-control"
+                        value={formData.unit_model}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="unit_serial">Serial Number</label>
+                      <input
+                        type="text"
+                        id="unit_serial"
+                        name="unit_serial"
+                        className="form-control"
+                        value={formData.unit_serial}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label htmlFor="install_date">Installation Date</label>
+                      <input
+                        type="date"
+                        id="install_date"
+                        name="install_date"
+                        className="form-control"
+                        value={formData.install_date}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="refrigerant_type">Refrigerant Type</label>
+                      <select
+                        id="refrigerant_type"
+                        name="refrigerant_type"
+                        className="form-control"
+                        value={formData.refrigerant_type}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Refrigerant</option>
+                        <option value="R-22">R-22 (HCFC-22)</option>
+                        <option value="R-410A">R-410A (Puron)</option>
+                        <option value="R-32">R-32</option>
+                        <option value="R-134a">R-134a</option>
+                        <option value="R-407C">R-407C</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="tonnage">Tonnage</label>
+                    <select
+                      id="tonnage"
+                      name="tonnage"
+                      className="form-control"
+                      value={formData.tonnage}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Tonnage</option>
+                      <option value="1.5">1.5 Ton</option>
+                      <option value="2">2 Ton</option>
+                      <option value="2.5">2.5 Ton</option>
+                      <option value="3">3 Ton</option>
+                      <option value="3.5">3.5 Ton</option>
+                      <option value="4">4 Ton</option>
+                      <option value="5">5 Ton</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Photo Upload Section */}
+                <div className="section">
+                  <h3>Equipment Photos</h3>
+                  
+                  <div className="file-upload">
+                    <input
+                      type="file"
+                      id="photos"
+                      name="photos"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileUpload}
+                      className="file-input"
+                    />
+                    <label htmlFor="photos" className="upload-button">
+                      <span>+</span> Add Photos
+                    </label>
+                    
+                    {uploadStatus && (
+                      <div className="upload-status">{uploadStatus}</div>
+                    )}
+                    
+                    {formData.photos && formData.photos.length > 0 ? (
+                      <div className="photo-preview-grid">
+                        {formData.photos.map((photo, index) => (
+                          <div key={index} className="photo-preview">
+                            <img 
+                              src={typeof photo === 'string' ? photo : URL.createObjectURL(photo)} 
+                              alt={`HVAC unit ${index + 1}`} 
+                            />
+                            <button 
+                              type="button" 
+                              className="remove-photo" 
+                              onClick={() => removePhoto(index)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="no-photos">No photos uploaded</div>
+                    )}
+                  </div>
+                </div>
                 
                 <div className="form-actions">
                   <button 
@@ -301,8 +585,19 @@ const CustomerDetail = () => {
                     <p><strong>Email:</strong> {customer.email || 'N/A'}</p>
                   </div>
                   <div>
-                    <p><strong>Address:</strong> {customer.address}</p>
-                    <p><strong>City/State/ZIP:</strong> {customer.city}, {customer.state} {customer.zip}</p>
+                    <p>
+                      <strong>Address:</strong>
+                      <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                          `${customer.address}, ${customer.city}, ${customer.state} ${customer.zip}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="map-link"
+                      >
+                        {customer.address}, {customer.city}, {customer.state} {customer.zip}
+                      </a>
+                    </p>
                   </div>
                 </div>
                 
@@ -312,6 +607,56 @@ const CustomerDetail = () => {
                     <p>{customer.notes}</p>
                   </div>
                 )}
+
+                {/* HVAC Equipment Section (View Mode) */}
+                <div className="section">
+                  <h3>HVAC Equipment</h3>
+                  
+                  <div className="form-grid">
+                    <div>
+                      <p>
+                        <strong>Equipment Type:</strong>
+                        {customer.has_indoor_unit && customer.has_outdoor_unit ? 'Indoor & Outdoor Units' : 
+                         customer.has_indoor_unit ? 'Indoor Unit' : 
+                         customer.has_outdoor_unit ? 'Outdoor Unit' : 'No units specified'}
+                      </p>
+                      <p><strong>Brand:</strong> {customer.unit_brand || 'N/A'}</p>
+                      <p><strong>Model:</strong> {customer.unit_model || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p><strong>Serial Number:</strong> {customer.unit_serial || 'N/A'}</p>
+                      <p>
+                        <strong>Install Date:</strong> 
+                        {formatDate(customer.install_date)}
+                      </p>
+                      <p><strong>Refrigerant:</strong> {customer.refrigerant_type || 'N/A'}</p>
+                      <p><strong>Tonnage:</strong> {customer.tonnage ? `${customer.tonnage} Ton` : 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Photos Section (View Mode) */}
+                <div className="section">
+                  <h3>Equipment Photos</h3>
+                  
+                  {customer.photos && customer.photos.length > 0 ? (
+                    <div className="photo-gallery">
+                      {customer.photos.map((photo, index) => (
+                        <div key={index} className="photo-item">
+                          <a 
+                            href={photo} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <img src={photo} alt={`HVAC unit ${index + 1}`} />
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-photos">No photos available</div>
+                  )}
+                </div>
                 
                 <div className="form-actions">
                   <button 
@@ -319,6 +664,13 @@ const CustomerDetail = () => {
                     onClick={() => setEditing(true)}
                   >
                     Edit Customer
+                  </button>
+                  <button 
+                    className="btn btn-danger" 
+                    onClick={deleteCustomer}
+                    style={{ marginLeft: 'auto' }}
+                  >
+                    Delete Customer
                   </button>
                 </div>
               </>

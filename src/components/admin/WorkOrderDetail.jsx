@@ -101,6 +101,30 @@ const WorkOrderDetail = () => {
       alert('An unexpected error occurred');
     }
   };
+
+  // Add this function after the updateStatus function
+  const deleteWorkOrder = async () => {
+    if (window.confirm('Are you sure you want to delete this work order? This action cannot be undone.')) {
+      try {
+        const { error } = await supabase
+          .from('work_orders')
+          .delete()
+          .eq('id', id);
+        
+        if (error) {
+          alert('Error deleting work order: ' + error.message);
+          return;
+        }
+        
+        // Redirect back to work orders list
+        navigate('/admin/workorders');
+        
+      } catch (error) {
+        console.error('Error in deleteWorkOrder:', error);
+        alert('An unexpected error occurred');
+      }
+    }
+  };
   
   const updateStatus = async (newStatus) => {
     try {
@@ -179,6 +203,7 @@ const WorkOrderDetail = () => {
   };
 
   return (
+    
     <div className="admin-container">
       <div className="admin-header">
         <h1>Work Order Details</h1>
@@ -189,7 +214,24 @@ const WorkOrderDetail = () => {
           Back to Work Orders
         </button>
       </div>
-      
+      <div className="admin-header">
+  <h1>Work Order Details</h1>
+  <div>
+    <button 
+      className="btn btn-secondary" 
+      onClick={() => navigate('/admin')}
+      style={{ marginRight: '10px' }}
+    >
+      Dashboard
+    </button>
+    <button 
+      className="btn btn-secondary" 
+      onClick={() => navigate('/admin/workorders')}
+    >
+      Back to Work Orders
+    </button>
+  </div>
+</div>
       {loading ? (
         <div className="loading">Loading work order details...</div>
       ) : workOrder ? (
@@ -213,8 +255,19 @@ const WorkOrderDetail = () => {
                     <p><strong>Email:</strong> {workOrder.customers.email || 'N/A'}</p>
                   </div>
                   <div>
-                    <p><strong>Address:</strong> {workOrder.customers.address}</p>
-                    <p><strong>City/State:</strong> {workOrder.customers.city}, {workOrder.customers.state} {workOrder.customers.zip}</p>
+                    <p>
+                      <strong>Address:</strong> 
+                      <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                          `${workOrder.customers.address}, ${workOrder.customers.city}, ${workOrder.customers.state} ${workOrder.customers.zip}`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="map-link"
+                      >
+                        {workOrder.customers.address}, {workOrder.customers.city}, {workOrder.customers.state} {workOrder.customers.zip}
+                      </a>
+                    </p>
                   </div>
                 </div>
                 
@@ -451,6 +504,7 @@ const WorkOrderDetail = () => {
               </div>
               
               <div className="status-actions">
+                {/* Status-specific buttons */}
                 {workOrder.status === 'pending' && (
                   <>
                     <button 
@@ -503,6 +557,15 @@ const WorkOrderDetail = () => {
                     Completed
                   </button>
                 )}
+
+                {/* Delete button - displayed regardless of status */}
+                <button 
+                  className="btn btn-danger" 
+                  onClick={deleteWorkOrder}
+                  style={{ marginLeft: 'right' }} // This pushes it to the right
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>

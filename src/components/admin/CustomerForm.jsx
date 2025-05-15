@@ -16,7 +16,16 @@ const CustomerForm = () => {
     state: 'SC',
     zip: '',
     type: 'residential',
-    notes: ''
+    notes: '',
+    // Add HVAC equipment fields
+    has_indoor_unit: false, 
+    has_outdoor_unit: false,
+    unit_brand: '',
+    unit_model: '',
+    unit_serial: '',
+    install_date: '',
+    refrigerant_type: '',
+    tonnage: ''
   });
   
   const handleChange = (e) => {
@@ -62,7 +71,24 @@ const CustomerForm = () => {
           Back to Customers
         </button>
       </div>
-      
+      <div className="admin-header">
+        <h1>Customer Details</h1>
+        <div>
+            <button 
+            className="btn btn-secondary" 
+            onClick={() => navigate('/admin/')}
+            style={{ marginRight: '10px' }}
+            >
+            Dashboard
+            </button>
+            <button 
+            className="btn btn-secondary" 
+            onClick={() => navigate('/admin/workorders')}
+            >
+            Back to Work Orders
+            </button>
+        </div>
+        </div>
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
@@ -174,7 +200,132 @@ const CustomerForm = () => {
               />
             </div>
           </div>
-          
+          {/* HVAC Equipment Section */}
+            <div className="section">
+            <h3>HVAC Equipment Details</h3>
+            
+            <div className="form-grid">
+                <div className="form-group">
+                <label>Equipment Type</label>
+                <div className="checkbox-group">
+                    <label>
+                    <input
+                        type="checkbox"
+                        checked={formData.has_indoor_unit}
+                        onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        has_indoor_unit: e.target.checked
+                        }))}
+                    />
+                    Indoor Unit
+                    </label>
+                    <label>
+                    <input
+                        type="checkbox"
+                        checked={formData.has_outdoor_unit}
+                        onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        has_outdoor_unit: e.target.checked
+                        }))}
+                    />
+                    Outdoor Unit
+                    </label>
+                </div>
+                </div>
+                
+                <div className="form-group">
+                <label htmlFor="unit_brand">Brand</label>
+                <input
+                    type="text"
+                    id="unit_brand"
+                    name="unit_brand"
+                    className="form-control"
+                    value={formData.unit_brand}
+                    onChange={handleChange}
+                />
+                </div>
+            </div>
+            
+            <div className="form-grid">
+                <div className="form-group">
+                <label htmlFor="unit_model">Model Number</label>
+                <input
+                    type="text"
+                    id="unit_model"
+                    name="unit_model"
+                    className="form-control"
+                    value={formData.unit_model}
+                    onChange={handleChange}
+                />
+                </div>
+                
+                <div className="form-group">
+                <label htmlFor="unit_serial">Serial Number</label>
+                <input
+                    type="text"
+                    id="unit_serial"
+                    name="unit_serial"
+                    className="form-control"
+                    value={formData.unit_serial}
+                    onChange={handleChange}
+                />
+                </div>
+            </div>
+            
+            <div className="form-grid">
+                <div className="form-group">
+                <label htmlFor="install_date">Installation Date</label>
+                <input
+                    type="date"
+                    id="install_date"
+                    name="install_date"
+                    className="form-control"
+                    value={formData.install_date}
+                    onChange={handleChange}
+                />
+                </div>
+                
+                <div className="form-group">
+                <label htmlFor="refrigerant_type">Refrigerant Type</label>
+                <select
+                    id="refrigerant_type"
+                    name="refrigerant_type"
+                    className="form-control"
+                    value={formData.refrigerant_type}
+                    onChange={handleChange}
+                >
+                    <option value="">Select Refrigerant</option>
+                    <option value="R-22">R-22 (HCFC-22)</option>
+                    <option value="R-410A">R-410A (Puron)</option>
+                    <option value="R-32">R-32</option>
+                    <option value="R-134a">R-134a</option>
+                    <option value="R-407C">R-407C</option>
+                    <option value="other">Other</option>
+                </select>
+                </div>
+            </div>
+            
+            <div className="form-group">
+                <label htmlFor="tonnage">Tonnage</label>
+                <select
+                id="tonnage"
+                name="tonnage"
+                className="form-control"
+                value={formData.tonnage}
+                onChange={handleChange}
+                >
+                <option value="">Select Tonnage</option>
+                <option value="1.5">1.5 Ton</option>
+                <option value="2">2 Ton</option>
+                <option value="2.5">2.5 Ton</option>
+                <option value="3">3 Ton</option>
+                <option value="3.5">3.5 Ton</option>
+                <option value="4">4 Ton</option>
+                <option value="5">5 Ton</option>
+                <option value="other">Other</option>
+                </select>
+            </div>
+            </div>
           <div className="form-group">
             <label htmlFor="notes">Notes</label>
             <textarea
