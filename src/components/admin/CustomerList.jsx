@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
-import '../admin/AdminStyles.css';
+import '../admin/CustomerList.css';
 
 const CustomerList = () => {
   const [customers, setCustomers] = useState([]);
@@ -54,75 +54,104 @@ const CustomerList = () => {
   }, [searchTerm, customers]);
 
   return (
-    
     <div className="admin-container">
-        <div className="admin-header">
-            <h1>Work Order Details</h1>
-            <div>
-                <button 
-                className="btn btn-secondary" 
-                style={{ marginRight: '10px' }}
-                >
-                Dashboard
-                </button>
-                
-            </div>
-            </div>
-      <div className="admin-header">
-        <h1>Customer Management</h1>
-        <Link to="/admin/customers/new" className="btn btn-primary">
-          Add New Customer
-        </Link>
-        <Link to="/admin" className="btn btn-secondary">
-          Dashboard
-        </Link>
+      <div className="customer-list-header">
+        <h1>Customer Directory</h1>
+        <div className="customer-count">
+          {filteredCustomers.length} {filteredCustomers.length === 1 ? 'customer' : 'customers'}
+        </div>
+      </div>
+
+      <div className="search-section">
+        <div className="search-container">
+          <div className="search-input-wrapper">
+            <input
+              type="text"
+              className="search-input enhanced"
+              placeholder="Search by name, phone, email, or address..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="search-icon">🔍</div>
+          </div>
+        </div>
+        {searchTerm && (
+          <div className="search-info">
+            Showing results for "{searchTerm}"
+          </div>
+        )}
       </div>
       
-      <div className="card">
-        <div className="search-container">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search customers by name, phone, email, or address..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      {loading ? (
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Loading customers...</p>
         </div>
-        
-        {loading ? (
-          <div className="loading">Loading customers...</div>
-        ) : filteredCustomers.length === 0 ? (
-          <div className="empty-state">
-            {searchTerm ? 'No customers match your search' : 'No customers found. Add your first customer!'}
-          </div>
-        ) : (
-          <div className="customer-list">
+      ) : filteredCustomers.length === 0 ? (
+        <div className="empty-state enhanced">
+          <div className="empty-icon">👥</div>
+          <h3>{searchTerm ? 'No customers found' : 'No customers yet'}</h3>
+          <p>{searchTerm ? 'Try adjusting your search terms' : 'Add your first customer to get started!'}</p>
+        </div>
+      ) : (
+        <div className="customer-table-container">
+          <div className="customer-table">
+            <div className="table-header">
+              <div className="header-cell name-col">Customer</div>
+              <div className="header-cell contact-col">Contact</div>
+              <div className="header-cell address-col">Address</div>
+              <div className="header-cell actions-col">Actions</div>
+            </div>
+            
             {filteredCustomers.map(customer => (
-              <div key={customer.id} className="customer-card">
-                <div className="customer-header">
-                  <h3>{customer.name}</h3>
-                  <span className="customer-type-badge">
-                    {customer.type === 'residential' ? 'Residential' : 'Commercial'}
-                  </span>
+              <div key={customer.id} className="customer-row">
+                <div className="row-cell name-col">
+                  <div className="customer-name-section">
+                    <h3 className="customer-name">{customer.name}</h3>
+                    <span className={`customer-type-badge ${customer.type}`}>
+                      {customer.type === 'residential' ? '🏠 Residential' : '🏢 Commercial'}
+                    </span>
+                  </div>
                 </div>
-                <div className="customer-details">
-                  <p><strong>Phone:</strong> {customer.phone}</p>
-                  <p><strong>Email:</strong> {customer.email || 'N/A'}</p>
-                  <p><strong>Address:</strong> {customer.address}, {customer.city}, {customer.state} {customer.zip}</p>
+                
+                <div className="row-cell contact-col">
+                                      <div className="contact-item">
+                      <span className="contact-icon">📞</span>
+                      <span className="contact-value">{customer.phone}</span>
+                    </div>
+                    {customer.email && (
+                      <div className="contact-item">
+                        <span className="contact-icon">✉️</span>
+                        <span className="contact-value">{customer.email}</span>
+                      </div>
+                    )}
+                  
                 </div>
-                <div className="customer-actions">
-                  <Link to={`/admin/customers/${customer.id}`} className="btn btn-primary btn-sm">
-                    View Details
-                  </Link>
-                  <Link to={`/admin/workorders/new?customer=${customer.id}`} className="btn btn-success btn-sm">
-                    Create Work Order
-                  </Link>
+                
+                <div className="row-cell address-col">
+                  <div className="address-info">
+                    <span className="address-icon">📍</span>
+                    <span className="address-text">
+                      {customer.address}, {customer.city}, {customer.state} {customer.zip}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="row-cell actions-col">
+                  <div className="customer-actions">
+                    <Link to={`/admin/customers/${customer.id}`} className="btn btn-outline btn-sm">
+                      View
+                    </Link>
+                    <Link to={`/admin/workorders/new?customer=${customer.id}`} className="btn btn-primary btn-sm">
+                      Work Order
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

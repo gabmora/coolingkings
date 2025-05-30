@@ -128,18 +128,7 @@ const Dashboard = () => {
 
   return (
     <div className="admin-container">
-      <div className="admin-header">
-        <h1>K&E HVAC Dashboard</h1>
-        <div>
-          <button 
-            className="btn btn-primary" 
-            onClick={() => navigate('/admin/workorders/new')}
-          >
-            Create Work Order
-          </button>
-        </div>
-      </div>
-      
+           
       {loading ? (
         <div className="loading">Loading dashboard data...</div>
       ) : (

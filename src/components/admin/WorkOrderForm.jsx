@@ -145,15 +145,7 @@ const WorkOrderForm = () => {
   
   return (
     <div className="admin-container">
-      <div className="admin-header">
-        <h1>Create New Work Order</h1>
-        <button 
-          className="btn btn-secondary" 
-          onClick={() => navigate('/admin/workorders')}
-        >
-          Back to Work Orders
-        </button>
-      </div>
+     
       
       <div className="card">
         <form onSubmit={handleSubmit}>

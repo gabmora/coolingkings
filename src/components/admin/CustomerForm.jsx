@@ -62,33 +62,8 @@ const CustomerForm = () => {
   
   return (
     <div className="admin-container">
-      <div className="admin-header">
-        <h1>Add New Customer</h1>
-        <button 
-          className="btn btn-secondary" 
-          onClick={() => navigate('/admin/customers')}
-        >
-          Back to Customers
-        </button>
-      </div>
-      <div className="admin-header">
-        <h1>Customer Details</h1>
-        <div>
-            <button 
-            className="btn btn-secondary" 
-            onClick={() => navigate('/admin/')}
-            style={{ marginRight: '10px' }}
-            >
-            Dashboard
-            </button>
-            <button 
-            className="btn btn-secondary" 
-            onClick={() => navigate('/admin/workorders')}
-            >
-            Back to Work Orders
-            </button>
-        </div>
-        </div>
+     
+   
       <div className="card">
         <form onSubmit={handleSubmit}>
           <div className="form-grid">

@@ -91,7 +91,7 @@ const Header = () => {
           
           <Link to="/AboutUs" className="nav-link">About Us</Link>
           
-          <Link to="/BookingPage" className="nav-link nav-cta">
+          <Link to="/estimate" className="nav-link nav-cta">
             Contact Us
           </Link>
         </nav>

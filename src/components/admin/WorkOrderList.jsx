@@ -128,33 +128,7 @@ const WorkOrderList = () => {
 
   return (
     <div className="admin-container">
-      <div className="admin-header">
-        <h1>Work Order Management</h1>
-        <button 
-          className="btn btn-primary" 
-          onClick={() => navigate('/admin/workorders/new')}
-        >
-          Create Work Order
-        </button>
-      </div>
-      <div className="admin-header">
-        <div>
-            <button 
-            className="btn btn-secondary" 
-            onClick={() => navigate('/admin')}
-            style={{ marginRight: '10px' }}
-            >
-            Dashboard
-            </button>
-            <button 
-            className="btn btn-primary" 
-            onClick={() => navigate('/admin/workorders/new')}
-            >
-            Create Work Order
-            </button>
-        </div>
-        </div>
-      <div className="card">
+       <div className="card">
         <div className="filters">
           <div className="search-container">
             <input

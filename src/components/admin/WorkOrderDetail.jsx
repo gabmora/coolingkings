@@ -205,33 +205,8 @@ const WorkOrderDetail = () => {
   return (
     
     <div className="admin-container">
-      <div className="admin-header">
-        <h1>Work Order Details</h1>
-        <button 
-          className="btn btn-secondary" 
-          onClick={() => navigate('/admin/workorders')}
-        >
-          Back to Work Orders
-        </button>
-      </div>
-      <div className="admin-header">
-  <h1>Work Order Details</h1>
-  <div>
-    <button 
-      className="btn btn-secondary" 
-      onClick={() => navigate('/admin')}
-      style={{ marginRight: '10px' }}
-    >
-      Dashboard
-    </button>
-    <button 
-      className="btn btn-secondary" 
-      onClick={() => navigate('/admin/workorders')}
-    >
-      Back to Work Orders
-    </button>
-  </div>
-</div>
+
+
       {loading ? (
         <div className="loading">Loading work order details...</div>
       ) : workOrder ? (

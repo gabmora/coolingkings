@@ -1,8 +1,8 @@
 // App.jsx - Updated with work order system routes
+
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import FrontPage from './components/FrontPage';
-import BookingPage from './components/BookingPage';
 import AboutUs from './components/AboutUs';
 import AC from './components/AC';
 import Heating from './components/Heating';
@@ -21,17 +21,23 @@ import WorkOrderForm from './components/admin/WorkOrderForm';
 import WorkOrderDetail from './components/admin/WorkOrderDetail';
 import AdminLogin from './components/admin/AdminLogin';
 import ProtectedRoute from './components/admin/ProtectedRoute';
+import AdminEstimates from './components/admin/AdminEstimates';
+import AdminHeader from './components/admin/AdminHeader'; // Add this import
 
 import './App.css';
 
-function App() {
+const AppLayout = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAdminLogin = location.pathname === '/admin/login';
+
   return (
-    <Router>
-      <Header />
+    <>
+      {!isAdminPage && <Header />}
+      {isAdminPage && !isAdminLogin && <AdminHeader />}
       <div className="main-content">
         <Routes>
           {/* Public routes */}
-          <Route path="/BookingPage" element={<BookingPage />} />
           <Route path="/MaintenancePlan" element={<MaintenancePlan />} />
           <Route path="/AC" element={<AC />} />
           <Route path="/Heating" element={<Heating />} />
@@ -83,9 +89,23 @@ function App() {
               <WorkOrderDetail />
             </ProtectedRoute>
           } />
+          
+          <Route path="/admin/estimates" element={
+            <ProtectedRoute>
+              <AdminEstimates />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
-      <Footer />
+      {!isAdminPage && <Footer />}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AppLayout />
     </Router>
   );
 }

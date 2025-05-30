@@ -17,7 +17,7 @@ Install necessary dependancies:
 ### `npm install emailjs-com`
 ### `npm install react@latest react-dom@latest`
 ### `npm install web-vitals`
-
+### `npm install @supabase/supabase-js`
 
 
 ### `npm test`
