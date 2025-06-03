@@ -710,7 +710,14 @@ const CustomerDetail = () => {
               {workOrders.map(order => (
                 <div key={order.id} className="work-order-card">
                   <div className="work-order-header">
-                    <h3>{order.title}</h3>
+                    <div>
+                      <h3>{order.title}</h3>
+                      {order.work_order_number && (
+                        <p style={{ margin: '0.25rem 0', color: '#666', fontSize: '0.85rem' }}>
+                          {order.work_order_number}
+                        </p>
+                      )}
+                    </div>
                     <span className={`status-badge ${getStatusClass(order.status)}`}>
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>

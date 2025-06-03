@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { hvacAIAgent, aiAgentUtils } from '../services/aiAgentService';
-import './AIChatWidget.css'; // We'll create separate CSS file
+import './AIChatWidget.css';
 
 const AIChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +9,8 @@ const AIChatWidget = () => {
       id: 1,
       sender: 'ai',
       message: "Hi! I'm K&E HVAC's AI assistant. I can help you with service questions, scheduling, or HVAC troubleshooting. How can I help you today?",
-      timestamp: new Date()
+      timestamp: new Date(),
+      conversationId: Date.now().toString()
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -34,7 +35,8 @@ const AIChatWidget = () => {
       id: Date.now(),
       sender: 'user',
       message: inputMessage.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
+      conversationId: conversationId
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -49,7 +51,8 @@ const AIChatWidget = () => {
           id: Date.now() + 1,
           sender: 'ai',
           message: quickResponse,
-          timestamp: new Date()
+          timestamp: new Date(),
+          conversationId: conversationId
         };
         setMessages(prev => [...prev, aiMessage]);
         setIsTyping(false);
@@ -67,7 +70,8 @@ const AIChatWidget = () => {
         sender: 'ai',
         message: response.message,
         timestamp: new Date(),
-        action: response.action
+        action: response.action,
+        conversationId: conversationId
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -83,7 +87,8 @@ const AIChatWidget = () => {
         id: Date.now() + 1,
         sender: 'ai',
         message: "I'm having trouble responding right now. Please call us at 201-844-3508 for immediate assistance.",
-        timestamp: new Date()
+        timestamp: new Date(),
+        conversationId: conversationId
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -100,23 +105,33 @@ const AIChatWidget = () => {
 
   const handleSchedulingSubmit = async (formData) => {
     try {
+      console.log('Starting scheduling submit with form data:', formData);
+      
       // Find or create customer
       let customer = await aiAgentUtils.findExistingCustomer(formData.phone, formData.email);
       
       if (!customer) {
+        console.log('Creating new customer...');
         customer = await aiAgentUtils.createCustomerFromChat(formData);
+      } else {
+        console.log('Found existing customer:', customer.name);
       }
 
       if (customer) {
-        // Generate work order from conversation
-        const workOrder = await hvacAIAgent.generateWorkOrderFromChat(messages, customer);
+        console.log('Generating work order for customer:', customer.id);
+        
+        // Generate work order from conversation with form data
+        const workOrder = await hvacAIAgent.generateWorkOrderFromChat(messages, customer, formData);
         
         if (workOrder) {
+          console.log('Work order created:', workOrder);
+          
           const successMessage = {
             id: Date.now(),
             sender: 'ai',
-            message: `Perfect! I've created work order #${workOrder.id} for you. Our team will contact you within 24 hours to confirm the appointment. You can also call us at 201-844-3508 if you need immediate assistance.`,
-            timestamp: new Date()
+            message: `Perfect! I've created work order ${workOrder.work_order_number || '#' + workOrder.id} for you. Our team will contact you within 24 hours to confirm the appointment. You can also call us at 201-844-3508 if you need immediate assistance.`,
+            timestamp: new Date(),
+            conversationId: conversationId
           };
           setMessages(prev => [...prev, successMessage]);
           
@@ -124,17 +139,33 @@ const AIChatWidget = () => {
           await aiAgentUtils.notifyAdminNewLead({
             customer_id: customer.id,
             work_order_id: workOrder.id,
+            work_order_number: workOrder.work_order_number,
             urgency: workOrder.priority,
             service_type: workOrder.service_type,
             source: 'ai_chat'
           });
+          
+          console.log('Lead notifications sent');
+        } else {
+          throw new Error('Failed to create work order');
         }
+      } else {
+        throw new Error('Failed to create or find customer');
       }
       
       setShowSchedulingForm(false);
       setCustomerInfo(customer);
     } catch (error) {
       console.error('Error handling scheduling:', error);
+      const errorMessage = {
+        id: Date.now(),
+        sender: 'ai',
+        message: "I encountered an error while creating your service request. Please call us at 201-844-3508 and we'll get you taken care of right away.",
+        timestamp: new Date(),
+        conversationId: conversationId
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setShowSchedulingForm(false);
     }
   };
 
@@ -249,7 +280,7 @@ const AIChatWidget = () => {
   );
 };
 
-// Scheduling Form Component
+// Scheduling Form Component - Enhanced with better validation
 const SchedulingForm = ({ onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -260,62 +291,124 @@ const SchedulingForm = ({ onSubmit, onCancel }) => {
     serviceType: '',
     description: ''
   });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (formData.name && formData.phone && formData.address && formData.serviceType) {
-      onSubmit(formData);
-    } else {
-      alert('Please fill in all required fields');
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.address.trim()) newErrors.address = 'Address is required';
+    if (!formData.serviceType) newErrors.serviceType = 'Service type is required';
+    
+    // Phone validation
+    const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    if (formData.phone && !phoneRegex.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+    
+    // Email validation (if provided)
+    if (formData.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = 'Please enter a valid email address';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (validateForm()) {
+      setIsSubmitting(true);
+      try {
+        await onSubmit(formData);
+      } catch (error) {
+        console.error('Error submitting form:', error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
   };
 
   return (
     <div className="scheduling-form">
       <div className="form-header">
         <h4>Schedule Service</h4>
-        <button onClick={onCancel}>✕</button>
+        <button onClick={onCancel} disabled={isSubmitting}>✕</button>
       </div>
       
       <div className="form-content">
         <div className="form-row">
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name *"
-            value={formData.name}
-            onChange={handleChange}
-          />
-          <input
-            type="tel"
-            name="phone"
-            placeholder="Phone Number *"
-            value={formData.phone}
-            onChange={handleChange}
-          />
+          <div>
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name *"
+              value={formData.name}
+              onChange={handleChange}
+              className={errors.name ? 'error' : ''}
+              disabled={isSubmitting}
+            />
+            {errors.name && <div className="field-error">{errors.name}</div>}
+          </div>
+          <div>
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone Number *"
+              value={formData.phone}
+              onChange={handleChange}
+              className={errors.phone ? 'error' : ''}
+              disabled={isSubmitting}
+            />
+            {errors.phone && <div className="field-error">{errors.phone}</div>}
+          </div>
         </div>
         
-        <input
-          type="email"
-          name="email"
-          placeholder="Email Address"
-          value={formData.email}
-          onChange={handleChange}
-        />
+        <div>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            value={formData.email}
+            onChange={handleChange}
+            className={errors.email ? 'error' : ''}
+            disabled={isSubmitting}
+          />
+          {errors.email && <div className="field-error">{errors.email}</div>}
+        </div>
         
-        <input
-          type="text"
-          name="address"
-          placeholder="Service Address *"
-          value={formData.address}
-          onChange={handleChange}
-        />
+        <div>
+          <input
+            type="text"
+            name="address"
+            placeholder="Service Address *"
+            value={formData.address}
+            onChange={handleChange}
+            className={errors.address ? 'error' : ''}
+            disabled={isSubmitting}
+          />
+          {errors.address && <div className="field-error">{errors.address}</div>}
+        </div>
         
         <div className="form-row">
           <input
@@ -324,19 +417,25 @@ const SchedulingForm = ({ onSubmit, onCancel }) => {
             value={formData.preferredDate}
             onChange={handleChange}
             min={new Date().toISOString().split('T')[0]}
+            disabled={isSubmitting}
           />
           
-          <select
-            name="serviceType"
-            value={formData.serviceType}
-            onChange={handleChange}
-          >
-            <option value="">Service Type *</option>
-            <option value="repair">Repair</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="installation">Installation</option>
-            <option value="inspection">Inspection</option>
-          </select>
+          <div>
+            <select
+              name="serviceType"
+              value={formData.serviceType}
+              onChange={handleChange}
+              className={errors.serviceType ? 'error' : ''}
+              disabled={isSubmitting}
+            >
+              <option value="">Service Type *</option>
+              <option value="repair">Repair</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="installation">Installation</option>
+              <option value="inspection">Inspection</option>
+            </select>
+            {errors.serviceType && <div className="field-error">{errors.serviceType}</div>}
+          </div>
         </div>
         
         <textarea
@@ -345,14 +444,25 @@ const SchedulingForm = ({ onSubmit, onCancel }) => {
           value={formData.description}
           onChange={handleChange}
           rows="3"
+          disabled={isSubmitting}
         ></textarea>
         
         <div className="form-actions">
-          <button type="button" onClick={onCancel} className="btn-cancel">
+          <button 
+            type="button" 
+            onClick={onCancel} 
+            className="btn-cancel"
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
-          <button type="button" onClick={handleSubmit} className="btn-submit">
-            Schedule Service
+          <button 
+            type="button" 
+            onClick={handleSubmit} 
+            className="btn-submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating...' : 'Schedule Service'}
           </button>
         </div>
       </div>

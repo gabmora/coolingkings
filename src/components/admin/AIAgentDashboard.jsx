@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../services/supabase';
-import './AIAgentDashboard.css'; // We'll create separate CSS file
+import './AIAgentDashboard.css';
 
 const AIAgentDashboard = () => {
   const [metrics, setMetrics] = useState({
@@ -24,8 +24,10 @@ const AIAgentDashboard = () => {
     try {
       setLoading(true);
       
-      // Get today's conversations count
+      // Get today's date for filtering
       const today = new Date().toISOString().split('T')[0];
+      
+      // Get today's conversations count
       const { data: conversations, error: convError } = await supabase
         .from('ai_conversations')
         .select('*')
@@ -39,7 +41,21 @@ const AIAgentDashboard = () => {
         }));
       }
 
-      // Fetch recent conversations
+      // Get today's leads count
+      const { data: todayLeads, error: leadsError } = await supabase
+        .from('ai_leads')
+        .select('*')
+        .gte('created_at', `${today}T00:00:00.000Z`)
+        .lte('created_at', `${today}T23:59:59.999Z`);
+
+      if (!leadsError && todayLeads) {
+        setMetrics(prev => ({
+          ...prev,
+          todayLeads: todayLeads.length
+        }));
+      }
+
+      // Fetch recent conversations with customer info
       const { data: recentConvs } = await supabase
         .from('ai_conversations')
         .select(`
@@ -51,19 +67,33 @@ const AIAgentDashboard = () => {
 
       setRecentConversations(recentConvs || []);
 
-      // Fetch active leads (if ai_leads table exists)
+      // Fetch active AI leads with customer and work order info
       const { data: leads } = await supabase
         .from('ai_leads')
         .select(`
           *,
           customers (name, phone, address),
-          work_orders (title, status)
+          work_orders (id, title, status, work_order_number)
         `)
-        .in('status', ['new', 'contacted'])
+        .in('status', ['new', 'contacted', 'qualified'])
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
 
+      console.log('Fetched AI leads:', leads);
       setActiveLeads(leads || []);
+
+      // Calculate metrics
+      if (leads && leads.length > 0) {
+        const avgScore = leads.reduce((sum, lead) => sum + (lead.lead_score || 5), 0) / leads.length;
+        const converted = leads.filter(lead => lead.work_order_id).length;
+        const conversionRate = leads.length > 0 ? (converted / leads.length) * 100 : 0;
+        
+        setMetrics(prev => ({
+          ...prev,
+          avgLeadScore: Math.round(avgScore * 10) / 10,
+          conversionRate: Math.round(conversionRate)
+        }));
+      }
 
       // Fetch unread notifications
       const { data: notifs } = await supabase
@@ -95,8 +125,21 @@ const AIAgentDashboard = () => {
       })
       .subscribe();
 
+    // Subscribe to new leads
+    const leadsSubscription = supabase
+      .channel('ai-leads')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'ai_leads' 
+      }, () => {
+        fetchDashboardData();
+      })
+      .subscribe();
+
     return () => {
       conversationsSubscription.unsubscribe();
+      leadsSubscription.unsubscribe();
     };
   };
 
@@ -109,6 +152,40 @@ const AIAgentDashboard = () => {
     if (!error) {
       setNotifications(prev => prev.filter(n => n.id !== id));
     }
+  };
+
+  const updateLeadStatus = async (leadId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('ai_leads')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+          ...(newStatus === 'contacted' ? { contacted_at: new Date().toISOString() } : {})
+        })
+        .eq('id', leadId);
+
+      if (!error) {
+        // Update local state
+        setActiveLeads(prev => 
+          prev.map(lead => 
+            lead.id === leadId ? { ...lead, status: newStatus } : lead
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error updating lead status:', error);
+    }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInHours = Math.floor((now - time) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return time.toLocaleDateString();
   };
 
   if (loading) {
@@ -169,24 +246,24 @@ const AIAgentDashboard = () => {
             <div className="metric-card">
               <div className="metric-icon">🎯</div>
               <div className="metric-content">
-                <h3>{activeLeads.length}</h3>
-                <p>Active Leads</p>
+                <h3>{metrics.todayLeads}</h3>
+                <p>Today's Leads</p>
               </div>
             </div>
             
             <div className="metric-card">
               <div className="metric-icon">📈</div>
               <div className="metric-content">
-                <h3>{recentConversations.length}</h3>
-                <p>Total Conversations</p>
+                <h3>{metrics.conversionRate}%</h3>
+                <p>Conversion Rate</p>
               </div>
             </div>
             
             <div className="metric-card">
-              <div className="metric-icon">🔔</div>
+              <div className="metric-icon">⭐</div>
               <div className="metric-content">
-                <h3>{notifications.length}</h3>
-                <p>New Notifications</p>
+                <h3>{metrics.avgLeadScore}</h3>
+                <p>Avg Lead Score</p>
               </div>
             </div>
           </div>
@@ -226,12 +303,12 @@ const AIAgentDashboard = () => {
                 <p className="status-good">Fully Operational</p>
               </div>
               <div className="stat-item">
-                <h3>📈 Performance</h3>
-                <p>Conversations logged: {recentConversations.length}</p>
+                <h3>📈 Total Leads</h3>
+                <p>{activeLeads.length} active leads</p>
               </div>
               <div className="stat-item">
-                <h3>🎯 Lead Generation</h3>
-                <p>Active leads: {activeLeads.length}</p>
+                <h3>🎯 Lead Quality</h3>
+                <p>Average score: {metrics.avgLeadScore}/10</p>
               </div>
             </div>
           </div>
@@ -242,40 +319,46 @@ const AIAgentDashboard = () => {
       {activeTab === 'conversations' && (
         <div className="conversations-tab">
           <h2>💬 Recent AI Conversations</h2>
-          <div className="conversations-list">
-            {recentConversations.map(conversation => (
-              <div key={conversation.id} className="conversation-item">
-                <div className="conversation-header">
-                  <div className="customer-info">
-                    <strong>
-                      {conversation.customers?.name || 'Anonymous'}
-                    </strong>
-                    <span className="phone">
-                      {conversation.customers?.phone}
+          {recentConversations.length === 0 ? (
+            <div className="empty-state">
+              <p>No conversations yet. Conversations will appear here when customers chat with the AI.</p>
+            </div>
+          ) : (
+            <div className="conversations-list">
+              {recentConversations.map(conversation => (
+                <div key={conversation.id} className="conversation-item">
+                  <div className="conversation-header">
+                    <div className="customer-info">
+                      <strong>
+                        {conversation.customers?.name || 'Anonymous'}
+                      </strong>
+                      <span className="phone">
+                        {conversation.customers?.phone}
+                      </span>
+                    </div>
+                    <span className="conversation-time">
+                      {formatTimeAgo(conversation.created_at)}
                     </span>
                   </div>
-                  <span className="conversation-time">
-                    {new Date(conversation.created_at).toLocaleString()}
-                  </span>
+                  
+                  <div className="conversation-messages">
+                    <div className="user-message">
+                      <strong>Customer:</strong> {conversation.user_message}
+                    </div>
+                    <div className="ai-message">
+                      <strong>AI:</strong> {conversation.ai_response}
+                    </div>
+                  </div>
+                  
+                  {conversation.intent && (
+                    <div className="conversation-intent">
+                      Intent: <span className="intent-badge">{conversation.intent}</span>
+                    </div>
+                  )}
                 </div>
-                
-                <div className="conversation-messages">
-                  <div className="user-message">
-                    <strong>Customer:</strong> {conversation.user_message}
-                  </div>
-                  <div className="ai-message">
-                    <strong>AI:</strong> {conversation.ai_response}
-                  </div>
-                </div>
-                
-                {conversation.intent && (
-                  <div className="conversation-intent">
-                    Intent: <span className="intent-badge">{conversation.intent}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -293,34 +376,59 @@ const AIAgentDashboard = () => {
                 <div key={lead.id} className="lead-item">
                   <div className="lead-header">
                     <div className="lead-info">
-                      <h4>{lead.customers?.name}</h4>
+                      <h4>{lead.customers?.name || 'Unknown Customer'}</h4>
                       <span className="lead-phone">{lead.customers?.phone}</span>
                     </div>
                     <div className="lead-score">
-                      Score: <span className="score high">
-                        {lead.lead_score || 8}/10
+                      Score: <span className={`score ${lead.lead_score >= 7 ? 'high' : lead.lead_score >= 4 ? 'medium' : 'low'}`}>
+                        {lead.lead_score || 5}/10
                       </span>
                     </div>
                   </div>
                   
                   <div className="lead-details">
-                    <p><strong>Service:</strong> {lead.service_type}</p>
+                    <p><strong>Service:</strong> {lead.service_type.charAt(0).toUpperCase() + lead.service_type.slice(1)}</p>
                     <p><strong>Urgency:</strong> 
-                      <span className={`urgency ${lead.urgency || 'medium'}`}>{lead.urgency || 'medium'}</span>
+                      <span className={`urgency ${lead.urgency}`}>{lead.urgency}</span>
+                    </p>
+                    <p><strong>Status:</strong> 
+                      <span className={`status ${lead.status}`}>{lead.status}</span>
                     </p>
                     <p><strong>Address:</strong> {lead.customers?.address}</p>
+                    <p><strong>Created:</strong> {formatTimeAgo(lead.created_at)}</p>
                     {lead.work_orders && (
-                      <p><strong>Work Order:</strong> {lead.work_orders.title} ({lead.work_orders.status})</p>
+                      <p><strong>Work Order:</strong> 
+                        <a href={`/admin/workorders/${lead.work_orders.id}`} target="_blank" rel="noopener noreferrer">
+                          {lead.work_orders.work_order_number || `#${lead.work_orders.id}`}
+                        </a>
+                        ({lead.work_orders.status})
+                      </p>
                     )}
                   </div>
                   
                   <div className="lead-actions">
-                    <button className="btn btn-primary btn-sm">
+                    <button 
+                      className="btn btn-primary btn-sm"
+                      onClick={() => window.open(`tel:${lead.customers?.phone}`)}
+                    >
                       📞 Call Customer
                     </button>
-                    <button className="btn btn-secondary btn-sm">
-                      📝 Add Notes
-                    </button>
+                    {lead.status === 'new' && (
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => updateLeadStatus(lead.id, 'contacted')}
+                      >
+                        ✓ Mark Contacted
+                      </button>
+                    )}
+                    {!lead.work_order_id && (
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => window.open(`/admin/workorders/new?customer=${lead.customer_id}`)}
+                      >
+                        📝 Create Work Order
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

@@ -137,12 +137,13 @@ const AdminEstimates = () => {
     return icons[serviceType] || '📝';
   };
 
-  const filteredEstimates = estimates.filter(estimate =>
-    estimate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    estimate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    estimate.service_type.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
+const filteredEstimates = estimates.filter(estimate =>
+  estimate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  estimate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  estimate.service_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  estimate.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  estimate.phone?.includes(searchTerm)
+);
   const stats = {
     total: estimates.length,
     pending: estimates.filter(e => e.status === 'pending').length,
@@ -423,6 +424,13 @@ const AdminEstimates = () => {
                     disabled={selectedEstimate.status === 'scheduled'}
                   >
                     📅 Mark Scheduled
+                  </button>
+                  <button 
+                    onClick={() => window.open(`/admin/workorders/new?estimate=${selectedEstimate.id}&customer_name=${encodeURIComponent(selectedEstimate.name)}&phone=${encodeURIComponent(selectedEstimate.phone)}&email=${encodeURIComponent(selectedEstimate.email)}&address=${encodeURIComponent(selectedEstimate.address)}&service_type=${selectedEstimate.service_type}&description=${encodeURIComponent(selectedEstimate.description)}`)}
+                    className="action-btn"
+                    style={{ backgroundColor: '#10b981' }}
+                  >
+                    🔧 Create Work Order
                   </button>
                 </div>
               </div>

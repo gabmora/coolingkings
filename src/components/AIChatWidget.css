@@ -1,4 +1,4 @@
-/* AIChatWidget.css */
+/* AIChatWidget.css - Enhanced with validation styles */
 .ai-chat-widget {
   position: fixed;
   bottom: 20px;
@@ -302,6 +302,21 @@
   border-color: #0056b3;
 }
 
+/* Validation Error Styles */
+.form-content input.error,
+.form-content select.error {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.field-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  padding-left: 4px;
+}
+
 .form-actions {
   display: flex;
   gap: 10px;
@@ -345,5 +360,9 @@
     bottom: 20px;
     right: 20px;
     position: fixed;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
   }
 }

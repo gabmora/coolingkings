@@ -197,7 +197,14 @@ const Dashboard = () => {
                     {inProgressWorkOrders.slice(0, 5).map(order => (
                       <div key={order.id} className="work-order-item">
                         <div className="work-order-header">
-                          <h3>{order.title}</h3>
+                          <div>
+                            <h3>{order.title}</h3>
+                            {order.work_order_number && (
+                              <p style={{ margin: '0.25rem 0', color: '#666', fontSize: '0.85rem' }}>
+                                {order.work_order_number}
+                              </p>
+                            )}
+                          </div>
                           <div className="date-badge">{formatDate(order.service_date)}</div>
                         </div>
                         <div className="work-order-details">
@@ -319,7 +326,14 @@ const Dashboard = () => {
                   {pendingWorkOrders.slice(0, 5).map(order => (
                     <div key={order.id} className="work-order-item">
                       <div className="work-order-header">
-                        <h3>{order.title}</h3>
+                        <div>
+                          <h3>{order.title}</h3>
+                          {order.work_order_number && (
+                            <p style={{ margin: '0.25rem 0', color: '#666', fontSize: '0.85rem' }}>
+                              {order.work_order_number}
+                            </p>
+                          )}
+                        </div>
                         <div className="date-badge">{formatDate(order.service_date)}</div>
                       </div>
                       <div className="work-order-details">

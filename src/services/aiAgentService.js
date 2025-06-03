@@ -1,11 +1,11 @@
-// src/services/aiAgentService.js - Fixed for existing database schema
+// src/services/aiAgentService.js - Updated with proper lead generation
 import OpenAI from "openai";
 import { supabase } from './supabase';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.REACT_APP_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Required for client-side usage
+  dangerouslyAllowBrowser: true
 });
 
 class HVACAIAgent {
@@ -26,7 +26,6 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
   // Main AI response method using OpenAI SDK
   async processCustomerMessage(message, context = {}) {
     try {
-      // Check if API key is configured
       if (!process.env.REACT_APP_OPENAI_API_KEY) {
         console.error('OpenAI API key not configured');
         return {
@@ -36,9 +35,8 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
         };
       }
 
-      // Use OpenAI SDK to generate response
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // Using the free model
+        model: "gpt-4o-mini",
         messages: [
           { role: 'system', content: this.systemPrompt },
           { role: 'user', content: message }
@@ -52,14 +50,15 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
       // Log conversation to database
       await this.logConversation({
         conversation_id: context.conversationId || 'unknown',
+        customer_id: context.customerInfo?.id || null,
         user_message: message,
         ai_response: aiResponse,
-        context: context,
-        timestamp: new Date().toISOString()
+        intent: this.detectIntent(message),
+        created_at: new Date().toISOString()
       });
 
       // Check if response contains scheduling intent
-      if (this.detectSchedulingIntent(aiResponse)) {
+      if (this.detectSchedulingIntent(aiResponse) || this.detectSchedulingIntent(message)) {
         return {
           message: aiResponse,
           action: 'show_scheduling_form',
@@ -70,13 +69,12 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
       return {
         message: aiResponse,
         action: null,
-        intent: 'general_inquiry'
+        intent: this.detectIntent(message)
       };
 
     } catch (error) {
       console.error('Error processing AI message:', error);
       
-      // Handle specific OpenAI errors
       if (error.status === 429) {
         return {
           message: "I'm getting a lot of requests right now. Please try again in a moment or call us at 201-844-3508 for immediate assistance.",
@@ -99,16 +97,96 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
     }
   }
 
+  // Detect intent from user message
+  detectIntent(message) {
+    const lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.includes('emergency') || lowerMessage.includes('urgent')) return 'emergency';
+    if (lowerMessage.includes('schedule') || lowerMessage.includes('appointment')) return 'schedule_service';
+    if (lowerMessage.includes('price') || lowerMessage.includes('cost')) return 'pricing_inquiry';
+    if (lowerMessage.includes('not working') || lowerMessage.includes('broken')) return 'repair_needed';
+    if (lowerMessage.includes('maintenance')) return 'maintenance_inquiry';
+    if (lowerMessage.includes('hours') || lowerMessage.includes('open')) return 'business_hours';
+    
+    return 'general_inquiry';
+  }
+
   // Detect if customer wants to schedule service
   detectSchedulingIntent(message) {
     const schedulingKeywords = [
       'schedule', 'appointment', 'service call', 'repair',
-      'maintenance', 'installation', 'visit', 'technician'
+      'maintenance', 'installation', 'visit', 'technician',
+      'book', 'set up', 'when can', 'available'
     ];
     
     return schedulingKeywords.some(keyword => 
       message.toLowerCase().includes(keyword)
     );
+  }
+
+  // Create lead from chat interaction - NEW FUNCTION
+  async createLeadFromChat(conversationHistory, customerInfo, formData = null) {
+    try {
+      // Qualify the lead based on conversation
+      const leadQualification = await this.qualifyLead(conversationHistory);
+      
+      // Determine urgency from conversation and form data
+      const urgency = this.determineUrgency(conversationHistory, formData);
+      
+      // Create lead record
+      const leadData = {
+        customer_id: customerInfo.id,
+        conversation_id: conversationHistory[0]?.conversationId || Date.now().toString(),
+        lead_score: leadQualification.score,
+        urgency: urgency,
+        service_type: formData?.serviceType || 'repair',
+        status: 'new',
+        source: 'ai_chat',
+        notes: `AI Chat Lead
+${formData?.description ? `Customer Issue: ${formData.description}` : ''}
+${formData?.preferredDate ? `Preferred Date: ${formData.preferredDate}` : ''}
+
+Conversation Summary:
+${conversationHistory.map(msg => `${msg.sender}: ${msg.message}`).join('\n')}
+
+Lead Qualification:
+Score: ${leadQualification.score}/10
+Reasons: ${leadQualification.reasons.join(', ')}`
+      };
+
+      const { data: createdLead, error } = await supabase
+        .from('ai_leads')
+        .insert([leadData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating lead:', error);
+        return null;
+      }
+
+      return createdLead;
+    } catch (error) {
+      console.error('Error in createLeadFromChat:', error);
+      return null;
+    }
+  }
+
+  // Determine urgency from conversation and form data
+  determineUrgency(conversationHistory, formData) {
+    const allMessages = conversationHistory.map(msg => msg.message).join(' ').toLowerCase();
+    
+    if (allMessages.includes('emergency') || allMessages.includes('not working') || 
+        allMessages.includes('broken') || allMessages.includes('urgent')) {
+      return 'high';
+    }
+    
+    if (allMessages.includes('soon') || allMessages.includes('this week') || 
+        formData?.serviceType === 'repair') {
+      return 'medium';
+    }
+    
+    return 'low';
   }
 
   // Auto-qualify leads based on conversation
@@ -120,7 +198,7 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
 
     try {
       if (!process.env.REACT_APP_OPENAI_API_KEY) {
-        return { score: 5, reasons: [], urgency: 'medium' };
+        return { score: 5, reasons: ['AI qualification unavailable'], urgency: 'medium' };
       }
 
       const completion = await openai.chat.completions.create({
@@ -140,22 +218,25 @@ Return JSON: {"score": number, "reasons": ["reason1", "reason2"], "urgency": "lo
       return JSON.parse(completion.choices[0].message.content);
     } catch (error) {
       console.error('Error qualifying lead:', error);
-      return { score: 5, reasons: [], urgency: 'medium' };
+      return { score: 5, reasons: ['Qualification failed'], urgency: 'medium' };
     }
   }
 
-  // Generate work order details from conversation - FIXED for your database schema
-  async generateWorkOrderFromChat(conversationHistory, customerInfo) {
+  // Generate work order details from conversation - UPDATED
+  async generateWorkOrderFromChat(conversationHistory, customerInfo, formData = null) {
     try {
+      // First create the lead
+      const lead = await this.createLeadFromChat(conversationHistory, customerInfo, formData);
+      
       if (!process.env.REACT_APP_OPENAI_API_KEY) {
-        // Fallback to manual work order creation using YOUR schema
         const workOrder = {
-          title: "Service Request from AI Chat",
-          service_type: "repair",
-          priority: "normal",
-          description: "Customer contacted via AI chat. Please review conversation history.",
+          title: formData?.serviceType ? `${formData.serviceType.charAt(0).toUpperCase() + formData.serviceType.slice(1)} Service` : "AI Chat Service Request",
+          service_type: formData?.serviceType || "repair",
+          priority: this.mapUrgencyToPriority(lead?.urgency || 'medium'),
+          description: formData?.description || "Service request from AI chat",
+          notes: `AI Generated Work Order${formData?.preferredDate ? `\nPreferred Date: ${formData.preferredDate}` : ''}\n\nCustomer Description: ${formData?.description || 'Not provided'}\n\nConversation Summary:\n${conversationHistory.map(msg => `${msg.sender}: ${msg.message}`).join('\n')}`,
           customer_id: customerInfo.id,
-          service_date: this.suggestServiceDate("normal"),
+          service_date: formData?.preferredDate || this.suggestServiceDate(lead?.urgency || 'medium'),
           time_preference: 'anytime',
           status: 'pending'
         };
@@ -170,6 +251,18 @@ Return JSON: {"score": number, "reasons": ["reason1", "reason2"], "urgency": "lo
           console.error('Error creating work order:', error);
           return null;
         }
+
+        // Update lead with work order ID
+        if (lead) {
+          await supabase
+            .from('ai_leads')
+            .update({ 
+              work_order_id: createdOrder.id,
+              status: 'converted'
+            })
+            .eq('id', lead.id);
+        }
+
         return createdOrder;
       }
 
@@ -199,14 +292,14 @@ Return JSON with ONLY these fields: {
 
       const workOrderDetails = JSON.parse(completion.choices[0].message.content);
 
-      // Create work order in database using YOUR existing schema
       const workOrder = {
-        title: workOrderDetails.title || "AI Chat Service Request",
-        service_type: workOrderDetails.service_type || "repair",
-        priority: workOrderDetails.priority || "normal",
-        description: workOrderDetails.description || "Service request from AI chat",
+        title: formData?.serviceType ? `${formData.serviceType.charAt(0).toUpperCase() + formData.serviceType.slice(1)} Service` : (workOrderDetails.title || "AI Chat Service Request"),
+        service_type: formData?.serviceType || workOrderDetails.service_type || "repair",
+        priority: workOrderDetails.priority || this.mapUrgencyToPriority(lead?.urgency || 'medium'),
+        description: formData?.description || workOrderDetails.description || "Service request from AI chat",
+        notes: `AI Generated Work Order${formData?.preferredDate ? `\nPreferred Date: ${formData.preferredDate}` : ''}\n\nCustomer Description: ${formData?.description || 'Not provided'}\n\nConversation Summary:\n${conversationHistory.map(msg => `${msg.sender}: ${msg.message}`).join('\n')}`,
         customer_id: customerInfo.id,
-        service_date: this.suggestServiceDate(workOrderDetails.priority || "normal"),
+        service_date: formData?.preferredDate || this.suggestServiceDate(workOrderDetails.priority || "normal"),
         time_preference: 'anytime',
         status: 'pending'
       };
@@ -222,10 +315,32 @@ Return JSON with ONLY these fields: {
         return null;
       }
 
+      // Update lead with work order ID
+      if (lead) {
+        await supabase
+          .from('ai_leads')
+          .update({ 
+            work_order_id: createdOrder.id,
+            status: 'converted'
+          })
+          .eq('id', lead.id);
+      }
+
       return createdOrder;
     } catch (error) {
       console.error('Error generating work order:', error);
       return null;
+    }
+  }
+
+  // Map urgency to priority
+  mapUrgencyToPriority(urgency) {
+    switch (urgency) {
+      case 'emergency': return 'emergency';
+      case 'high': return 'high';
+      case 'medium': return 'normal';
+      case 'low': return 'low';
+      default: return 'normal';
     }
   }
 
@@ -234,15 +349,16 @@ Return JSON with ONLY these fields: {
     const now = new Date();
     switch (priority) {
       case 'emergency':
-        return now.toISOString().split('T')[0]; // Today
+        return now.toISOString().split('T')[0];
       case 'high':
-        now.setDate(now.getDate() + 1); // Tomorrow
+        now.setDate(now.getDate() + 1);
         return now.toISOString().split('T')[0];
       case 'normal':
-        now.setDate(now.getDate() + 3); // 3 days
+      case 'medium':
+        now.setDate(now.getDate() + 3);
         return now.toISOString().split('T')[0];
       default:
-        now.setDate(now.getDate() + 7); // 1 week
+        now.setDate(now.getDate() + 7);
         return now.toISOString().split('T')[0];
     }
   }
@@ -301,12 +417,11 @@ Return JSON with ONLY these fields: {
 
 export const hvacAIAgent = new HVACAIAgent();
 
-// Utility functions for AI agent features - FIXED for your database
+// Utility functions for AI agent features - UPDATED
 export const aiAgentUtils = {
-  // Check if customer exists in database - FIXED query
+  // Check if customer exists in database
   async findExistingCustomer(phone, email) {
     try {
-      // Search by phone first (more reliable)
       let query = supabase
         .from('customers')
         .select('*');

@@ -1,4 +1,4 @@
-// components/admin/WorkOrderList.jsx
+// components/admin/WorkOrderList.jsx - Updated to show work order numbers
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
@@ -66,7 +66,8 @@ const WorkOrderList = () => {
         order.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.customers.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customers.phone.includes(searchTerm)
+        order.customers.phone.includes(searchTerm) ||
+        (order.work_order_number && order.work_order_number.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
     
@@ -103,7 +104,8 @@ const WorkOrderList = () => {
         .update({ 
           status: newStatus,
           updated_at: new Date().toISOString(),
-          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {})
+          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {}),
+          ...(newStatus === 'in-progress' ? { started_at: new Date().toISOString() } : {})
         })
         .eq('id', id);
       
@@ -128,13 +130,20 @@ const WorkOrderList = () => {
 
   return (
     <div className="admin-container">
-       <div className="card">
+      <div className="admin-header">
+        <h1>Work Orders</h1>
+        <Link to="/admin/workorders/new" className="btn btn-primary">
+          + New Work Order
+        </Link>
+      </div>
+      
+      <div className="card">
         <div className="filters">
           <div className="search-container">
             <input
               type="text"
               className="search-input"
-              placeholder="Search work orders..."
+              placeholder="Search by work order #, customer, or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -177,7 +186,14 @@ const WorkOrderList = () => {
             {filteredWorkOrders.map(order => (
               <div key={order.id} className="work-order-item">
                 <div className="work-order-header">
-                  <h3>{order.title}</h3>
+                  <div>
+                    <h3>{order.title}</h3>
+                    {order.work_order_number && (
+                      <p style={{ margin: '0.25rem 0', color: '#666', fontSize: '0.85rem' }}>
+                        {order.work_order_number}
+                      </p>
+                    )}
+                  </div>
                   <span className={`badge ${getStatusClass(order.status)}`}>
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>
@@ -198,8 +214,21 @@ const WorkOrderList = () => {
                     </div>
                   </div>
                   <div className="detail-row">
+                    <div className="detail-label">Priority:</div>
+                    <div className="detail-value">
+                      <span className={`badge ${order.priority === 'emergency' ? 'badge-danger' : 
+                        order.priority === 'high' ? 'badge-warning' : 'badge-secondary'}`}>
+                        {order.priority.charAt(0).toUpperCase() + order.priority.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="detail-row">
                     <div className="detail-label">Description:</div>
-                    <div className="detail-value">{order.description.substring(0, 100)}...</div>
+                    <div className="detail-value">
+                      {order.description.length > 100 ? 
+                        `${order.description.substring(0, 100)}...` : 
+                        order.description}
+                    </div>
                   </div>
                 </div>
                 <div className="work-order-actions">

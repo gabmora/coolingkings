@@ -1,7 +1,8 @@
-// components/admin/WorkOrderDetail.jsx
+// components/admin/WorkOrderDetail.jsx - Updated with work order number and better notes handling
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
+import { updateWorkOrderNotes } from '../../services/workOrderService';
 import '../admin/AdminStyles.css';
 
 const WorkOrderDetail = () => {
@@ -10,6 +11,8 @@ const WorkOrderDetail = () => {
   const [workOrder, setWorkOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     service_date: '',
@@ -44,6 +47,7 @@ const WorkOrderDetail = () => {
         }
         
         setWorkOrder(data);
+        setNotesValue(data.notes || '');
         setFormData({
           title: data.title,
           service_date: data.service_date,
@@ -102,7 +106,25 @@ const WorkOrderDetail = () => {
     }
   };
 
-  // Add this function after the updateStatus function
+  // Handle notes update separately
+  const handleNotesUpdate = async () => {
+    try {
+      const updatedOrder = await updateWorkOrderNotes(id, notesValue);
+      if (updatedOrder) {
+        setWorkOrder({
+          ...workOrder,
+          ...updatedOrder
+        });
+        setEditingNotes(false);
+      } else {
+        alert('Error updating notes');
+      }
+    } catch (error) {
+      console.error('Error updating notes:', error);
+      alert('An unexpected error occurred');
+    }
+  };
+
   const deleteWorkOrder = async () => {
     if (window.confirm('Are you sure you want to delete this work order? This action cannot be undone.')) {
       try {
@@ -133,7 +155,8 @@ const WorkOrderDetail = () => {
         .update({ 
           status: newStatus,
           updated_at: new Date().toISOString(),
-          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {})
+          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {}),
+          ...(newStatus === 'in-progress' ? { started_at: new Date().toISOString() } : {})
         })
         .eq('id', id)
         .select();
@@ -203,17 +226,21 @@ const WorkOrderDetail = () => {
   };
 
   return (
-    
     <div className="admin-container">
-
-
       {loading ? (
         <div className="loading">Loading work order details...</div>
       ) : workOrder ? (
         <>
           <div className="card">
             <div className="work-order-header">
-              <h2>{workOrder.title}</h2>
+              <div>
+                <h2>{workOrder.title}</h2>
+                {workOrder.work_order_number && (
+                  <p style={{ margin: '0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
+                    Work Order: <strong>{workOrder.work_order_number}</strong>
+                  </p>
+                )}
+              </div>
               <span className={`badge ${getStatusClass(workOrder.status)}`}>
                 {workOrder.status.charAt(0).toUpperCase() + workOrder.status.slice(1)}
               </span>
@@ -351,18 +378,6 @@ const WorkOrderDetail = () => {
                     ></textarea>
                   </div>
                   
-                  <div className="form-group">
-                    <label htmlFor="notes">Additional Notes</label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      className="form-control"
-                      value={formData.notes}
-                      onChange={handleChange}
-                      rows="2"
-                    ></textarea>
-                  </div>
-                  
                   <div className="form-actions">
                     <button 
                       type="button" 
@@ -426,13 +441,6 @@ const WorkOrderDetail = () => {
                   <div className="detail-value">{workOrder.description}</div>
                 </div>
                 
-                {workOrder.notes && (
-                  <div className="detail-item">
-                    <div className="detail-label">Additional Notes:</div>
-                    <div className="detail-value">{workOrder.notes}</div>
-                  </div>
-                )}
-                
                 <div className="form-actions">
                   <button 
                     className="btn btn-primary" 
@@ -443,6 +451,65 @@ const WorkOrderDetail = () => {
                 </div>
               </div>
             )}
+
+            {/* Notes Section - Separate from main form */}
+            <div className="section">
+              <h3>Technical Notes</h3>
+              {editingNotes ? (
+                <div>
+                  <div className="form-group">
+                    <textarea
+                      className="form-control"
+                      value={notesValue}
+                      onChange={(e) => setNotesValue(e.target.value)}
+                      rows="6"
+                      placeholder="Add technical notes, findings, parts used, etc..."
+                    />
+                  </div>
+                  <div className="form-actions">
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => {
+                        setNotesValue(workOrder.notes || '');
+                        setEditingNotes(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-primary"
+                      onClick={handleNotesUpdate}
+                    >
+                      Save Notes
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="detail-item">
+                    <div className="detail-value" style={{ 
+                      backgroundColor: '#f8f9fa', 
+                      padding: '1rem', 
+                      borderRadius: '4px',
+                      minHeight: '100px',
+                      whiteSpace: 'pre-wrap'
+                    }}>
+                      {workOrder.notes || 'No notes added yet.'}
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={() => setEditingNotes(true)}
+                    >
+                      Edit Notes
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             
             {/* Status Timeline */}
             <div className="section">
@@ -537,7 +604,7 @@ const WorkOrderDetail = () => {
                 <button 
                   className="btn btn-danger" 
                   onClick={deleteWorkOrder}
-                  style={{ marginLeft: 'right' }} // This pushes it to the right
+                  style={{ marginLeft: 'auto' }}
                 >
                   Delete
                 </button>
