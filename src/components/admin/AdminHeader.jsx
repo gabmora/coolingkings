@@ -23,6 +23,7 @@ const AdminHeader = () => {
     if (path === '/admin/estimates') return 'Estimate Requests';
     if (path === '/admin/customers') return 'Customers';
     if (path === '/admin/workorders') return 'Work Orders';
+    if (path === '/admin/ai-agent') return 'AI Agent'; // NEW
     if (path.includes('/admin/customers/')) return 'Customer Details';
     if (path.includes('/admin/workorders/')) return 'Work Order Details';
     return 'Admin';
@@ -64,6 +65,13 @@ const AdminHeader = () => {
             className={`nav-item ${isActivePage('/admin/workorders') ? 'active' : ''}`}
           >
             🔧 Work Orders
+          </Link>
+          {/* NEW: AI Agent Navigation */}
+          <Link 
+            to="/admin/ai-agent" 
+            className={`nav-item ${isActivePage('/admin/ai-agent') ? 'active' : ''}`}
+          >
+            🤖 AI Agent
           </Link>
         </nav>
 

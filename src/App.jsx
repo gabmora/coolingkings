@@ -1,4 +1,4 @@
-// App.jsx - Updated with work order system routes
+// App.jsx - Updated with AI Agent integration
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
@@ -22,7 +22,11 @@ import WorkOrderDetail from './components/admin/WorkOrderDetail';
 import AdminLogin from './components/admin/AdminLogin';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminEstimates from './components/admin/AdminEstimates';
-import AdminHeader from './components/admin/AdminHeader'; // Add this import
+import AdminHeader from './components/admin/AdminHeader';
+
+// Import AI Agent components
+import AIChatWidget from './components/AIChatWidget';
+import AIAgentDashboard from './components/admin/AIAgentDashboard';
 
 import './App.css';
 
@@ -95,9 +99,19 @@ const AppLayout = () => {
               <AdminEstimates />
             </ProtectedRoute>
           } />
+          
+          {/* NEW: AI Agent Dashboard route */}
+          <Route path="/admin/ai-agent" element={
+            <ProtectedRoute>
+              <AIAgentDashboard />
+            </ProtectedRoute>
+          } />
         </Routes>
       </div>
       {!isAdminPage && <Footer />}
+      
+      {/* NEW: Add AI Chat Widget to customer pages only */}
+      {!isAdminPage && <AIChatWidget />}
     </>
   );
 };
