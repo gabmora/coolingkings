@@ -1,12 +1,31 @@
-// src/services/aiAgentService.js - Updated with proper lead generation
-import OpenAI from "openai";
+// src/services/aiAgentService.js - Production-safe version
 import { supabase } from './supabase';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
+// Lazy load OpenAI only when needed and API key is available
+let openai = null;
+
+const initializeOpenAI = async () => {
+  if (!process.env.REACT_APP_OPENAI_API_KEY) {
+    console.log('OpenAI API key not available - using fallback responses');
+    return null;
+  }
+  
+  if (!openai) {
+    try {
+      const OpenAI = await import('openai');
+      openai = new OpenAI.default({
+        apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+        dangerouslyAllowBrowser: true
+      });
+      console.log('OpenAI initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize OpenAI:', error);
+      return null;
+    }
+  }
+  
+  return openai;
+};
 
 class HVACAIAgent {
   constructor() {
@@ -23,19 +42,49 @@ If someone needs immediate emergency service, direct them to call 201-844-3508.
 For scheduling, collect: name, phone, address, service type, preferred date/time, and issue description.`;
   }
 
-  // Main AI response method using OpenAI SDK
+  // Main AI response method with fallback
   async processCustomerMessage(message, context = {}) {
     try {
-      if (!process.env.REACT_APP_OPENAI_API_KEY) {
-        console.error('OpenAI API key not configured');
+      // Try to get quick response first (doesn't need OpenAI)
+      const quickResponse = this.getQuickResponse(message);
+      if (quickResponse) {
+        await this.logConversation({
+          conversation_id: context.conversationId || 'unknown',
+          customer_id: context.customerInfo?.id || null,
+          user_message: message,
+          ai_response: quickResponse,
+          intent: this.detectIntent(message),
+          created_at: new Date().toISOString()
+        });
+
         return {
-          message: "I'm having trouble connecting to our AI service. Please call us at 201-844-3508 for immediate assistance.",
-          action: null,
-          intent: 'error'
+          message: quickResponse,
+          action: this.detectSchedulingIntent(quickResponse) || this.detectSchedulingIntent(message) ? 'show_scheduling_form' : null,
+          intent: this.detectIntent(message)
         };
       }
 
-      const completion = await openai.chat.completions.create({
+      // Try to initialize OpenAI
+      const aiClient = await initializeOpenAI();
+      
+      if (!aiClient) {
+        // Fallback response when OpenAI is not available
+        const fallbackResponse = this.getFallbackResponse(message);
+        
+        await this.logConversation({
+          conversation_id: context.conversationId || 'unknown',
+          customer_id: context.customerInfo?.id || null,
+          user_message: message,
+          ai_response: fallbackResponse.message,
+          intent: fallbackResponse.intent,
+          created_at: new Date().toISOString()
+        });
+
+        return fallbackResponse;
+      }
+
+      // Use OpenAI if available
+      const completion = await aiClient.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           { role: 'system', content: this.systemPrompt },
@@ -75,26 +124,84 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
     } catch (error) {
       console.error('Error processing AI message:', error);
       
+      // Enhanced fallback for different error types
+      let fallbackMessage = "I'm having trouble responding right now. Please call us at 201-844-3508 for immediate assistance.";
+      
       if (error.status === 429) {
-        return {
-          message: "I'm getting a lot of requests right now. Please try again in a moment or call us at 201-844-3508 for immediate assistance.",
-          action: null,
-          intent: 'error'
-        };
+        fallbackMessage = "I'm getting a lot of requests right now. Please try again in a moment or call us at 201-844-3508 for immediate assistance.";
       } else if (error.status === 401) {
-        return {
-          message: "I'm having trouble with my authentication. Please call us at 201-844-3508 for immediate assistance.",
-          action: null,
-          intent: 'error'
-        };
-      } else {
-        return {
-          message: "I'm having trouble responding right now. Please call us at 201-844-3508 for immediate assistance.",
-          action: null,
-          intent: 'error'
-        };
+        fallbackMessage = "I'm having trouble with my authentication. Please call us at 201-844-3508 for immediate assistance.";
       }
+
+      return {
+        message: fallbackMessage,
+        action: null,
+        intent: 'error'
+      };
     }
+  }
+
+  // Enhanced fallback responses when OpenAI is not available
+  getFallbackResponse(message) {
+    const lowerMessage = message.toLowerCase();
+    
+    // Emergency responses
+    if (lowerMessage.includes('emergency') || lowerMessage.includes('urgent') || 
+        lowerMessage.includes('not working') || lowerMessage.includes('broken')) {
+      return {
+        message: "I understand this is urgent! For immediate emergency HVAC service, please call us right now at 201-844-3508. We provide 24/7 emergency service and can have a technician dispatched quickly.",
+        action: null,
+        intent: 'emergency'
+      };
+    }
+
+    // Scheduling requests
+    if (lowerMessage.includes('schedule') || lowerMessage.includes('appointment') || 
+        lowerMessage.includes('service') || lowerMessage.includes('repair') ||
+        lowerMessage.includes('maintenance') || lowerMessage.includes('install')) {
+      return {
+        message: "I'd be happy to help you schedule HVAC service! Let me get some information from you to set up an appointment with our technicians.",
+        action: 'show_scheduling_form',
+        intent: 'schedule_service'
+      };
+    }
+
+    // AC/Cooling issues
+    if (lowerMessage.includes('ac') || lowerMessage.includes('cooling') || 
+        lowerMessage.includes('air condition') || lowerMessage.includes('cold')) {
+      return {
+        message: "For AC issues, try these quick checks: 1) Make sure thermostat is set to 'cool' and temperature is lower than current room temp, 2) Check if air filter needs replacing, 3) Ensure circuit breakers are on. If these don't help, I can schedule a technician visit for you!",
+        action: null,
+        intent: 'repair_needed'
+      };
+    }
+
+    // Heating issues
+    if (lowerMessage.includes('heat') || lowerMessage.includes('furnace') || 
+        lowerMessage.includes('warm') || lowerMessage.includes('hot')) {
+      return {
+        message: "For heating issues, check: 1) Thermostat is set to 'heat' mode, 2) Temperature setting is higher than current room temp, 3) Air filter isn't clogged, 4) Circuit breakers are on. Still having trouble? Let me schedule a service call for you!",
+        action: null,
+        intent: 'repair_needed'
+      };
+    }
+
+    // Pricing questions
+    if (lowerMessage.includes('price') || lowerMessage.includes('cost') || 
+        lowerMessage.includes('estimate') || lowerMessage.includes('quote')) {
+      return {
+        message: "Our service call fee starts at $89, and we provide free estimates for installations and major repairs. The exact cost depends on your specific needs. I can schedule an appointment for a technician to assess your situation and provide an accurate quote.",
+        action: null,
+        intent: 'pricing_inquiry'
+      };
+    }
+
+    // Default response
+    return {
+      message: "Thanks for contacting K&E HVAC! I'm here to help with your heating and cooling needs. Whether you need emergency service, routine maintenance, or have questions about your HVAC system, I can assist you. What can I help you with today?",
+      action: null,
+      intent: 'general_inquiry'
+    };
   }
 
   // Detect intent from user message
@@ -124,7 +231,7 @@ For scheduling, collect: name, phone, address, service type, preferred date/time
     );
   }
 
-  // Create lead from chat interaction - NEW FUNCTION
+  // Create lead from chat interaction
   async createLeadFromChat(conversationHistory, customerInfo, formData = null) {
     try {
       // Qualify the lead based on conversation
@@ -189,7 +296,7 @@ Reasons: ${leadQualification.reasons.join(', ')}`
     return 'low';
   }
 
-  // Auto-qualify leads based on conversation
+  // Auto-qualify leads based on conversation (with fallback)
   async qualifyLead(conversationHistory) {
     const messages = conversationHistory.map(msg => ({
       role: msg.sender === 'ai' ? 'assistant' : 'user',
@@ -197,11 +304,20 @@ Reasons: ${leadQualification.reasons.join(', ')}`
     }));
 
     try {
-      if (!process.env.REACT_APP_OPENAI_API_KEY) {
-        return { score: 5, reasons: ['AI qualification unavailable'], urgency: 'medium' };
+      const aiClient = await initializeOpenAI();
+      
+      if (!aiClient) {
+        // Simple fallback qualification
+        const urgency = this.determineUrgency(conversationHistory, null);
+        const score = urgency === 'high' ? 8 : urgency === 'medium' ? 6 : 4;
+        return { 
+          score, 
+          reasons: ['Basic qualification - AI unavailable'], 
+          urgency 
+        };
       }
 
-      const completion = await openai.chat.completions.create({
+      const completion = await aiClient.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
@@ -222,13 +338,16 @@ Return JSON: {"score": number, "reasons": ["reason1", "reason2"], "urgency": "lo
     }
   }
 
-  // Generate work order details from conversation - UPDATED
+  // Generate work order details from conversation
   async generateWorkOrderFromChat(conversationHistory, customerInfo, formData = null) {
     try {
       // First create the lead
       const lead = await this.createLeadFromChat(conversationHistory, customerInfo, formData);
       
-      if (!process.env.REACT_APP_OPENAI_API_KEY) {
+      const aiClient = await initializeOpenAI();
+      
+      if (!aiClient) {
+        // Fallback work order creation
         const workOrder = {
           title: formData?.serviceType ? `${formData.serviceType.charAt(0).toUpperCase() + formData.serviceType.slice(1)} Service` : "AI Chat Service Request",
           service_type: formData?.serviceType || "repair",
@@ -266,13 +385,13 @@ Return JSON: {"score": number, "reasons": ["reason1", "reason2"], "urgency": "lo
         return createdOrder;
       }
 
-      // Use AI to generate work order details
+      // Use AI to generate work order details if available
       const messages = conversationHistory.map(msg => ({
         role: msg.sender === 'ai' ? 'assistant' : 'user',
         content: msg.message
       }));
 
-      const completion = await openai.chat.completions.create({
+      const completion = await aiClient.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
@@ -399,7 +518,13 @@ Return JSON with ONLY these fields: {
   // Test function to verify OpenAI connection
   async testConnection() {
     try {
-      const completion = await openai.chat.completions.create({
+      const aiClient = await initializeOpenAI();
+      if (!aiClient) {
+        console.log('OpenAI not available - using fallback responses');
+        return false;
+      }
+      
+      const completion = await aiClient.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           { role: "user", content: "write a haiku about HVAC" }
@@ -417,7 +542,7 @@ Return JSON with ONLY these fields: {
 
 export const hvacAIAgent = new HVACAIAgent();
 
-// Utility functions for AI agent features - UPDATED
+// Utility functions for AI agent features
 export const aiAgentUtils = {
   // Check if customer exists in database
   async findExistingCustomer(phone, email) {
@@ -499,10 +624,5 @@ export const aiAgentUtils = {
     }
   }
 };
-
-// Test OpenAI connection on import (for debugging)
-if (process.env.NODE_ENV === 'development') {
-  hvacAIAgent.testConnection();
-}
 
 export default hvacAIAgent;
