@@ -346,7 +346,7 @@ a:hover {
 
 /* ===== CARD COMPONENT ===== */
 .card {
-  background-color: rgb(208, 213, 247);
+  background-color: rgb(210, 216, 252);
   border: 1px solid var(--secondary-200);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);

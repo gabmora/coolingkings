@@ -40,45 +40,46 @@ const AIChatWidget = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentMessage = inputMessage.trim(); // Store message before clearing
     setInputMessage('');
     setIsTyping(true);
 
     try {
-      // Check for quick responses first
-      const quickResponse = hvacAIAgent.getQuickResponse(inputMessage);
-      if (quickResponse) {
-        const aiMessage = {
-          id: Date.now() + 1,
-          sender: 'ai',
-          message: quickResponse,
-          timestamp: new Date(),
-          conversationId: conversationId
-        };
-        setMessages(prev => [...prev, aiMessage]);
-        setIsTyping(false);
-        return;
-      }
+      const response = await fetch('https://gmc-space.app.n8n.cloud/webhook/hvac-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: currentMessage,
+          customer_name: customerInfo?.name || '',
+          phone: customerInfo?.phone || '',
+          session_id: conversationId
+        })
+      });
 
-      // Process with AI
-      const response = await hvacAIAgent.processCustomerMessage(
-        inputMessage, 
-        { conversationId, customerInfo }
-      );
+      const data = await response.json();
 
       const aiMessage = {
         id: Date.now() + 1,
         sender: 'ai',
-        message: response.message,
+        message: data.message,
         timestamp: new Date(),
-        action: response.action,
+        category: data.category,
+        urgency: data.urgency,
+        action: data.action,
         conversationId: conversationId
       };
 
       setMessages(prev => [...prev, aiMessage]);
 
-      // Handle special actions
-      if (response.action === 'show_scheduling_form') {
+      // Enhanced action handling
+      if (data.action === 'show_form' || data.category === 'scheduling') {
         setShowSchedulingForm(true);
+      } else if (data.action === 'emergency_alert' || data.urgency === 'emergency') {
+        // Emergency handling - you could add sound, special styling, etc.
+        console.log('🚨 EMERGENCY REQUEST DETECTED');
+        // Optional: Play alert sound, change chat background color, etc.
       }
 
     } catch (error) {
