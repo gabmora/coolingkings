@@ -19,7 +19,7 @@ const AdminHeader = () => {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/admin') return 'Dashboard';
-    if (path === '/admin/calendar') return 'Calendar'; // FIXED
+    if (path === '/admin/calendar') return 'Calendar';
     if (path === '/admin/estimates') return 'Estimate Requests';
     if (path === '/admin/customers') return 'Customers';
     if (path === '/admin/workorders') return 'Work Orders';
@@ -39,7 +39,7 @@ const AdminHeader = () => {
           </Link>
         </div>
 
-        {/* Center - Navigation - REMOVED AI AGENT */}
+        {/* Center - Navigation - AI AGENT REMOVED */}
         <nav className="admin-nav">
           <Link 
             to="/admin" 
