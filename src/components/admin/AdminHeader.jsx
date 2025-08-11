@@ -8,8 +8,7 @@ const AdminHeader = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Add your logout logic here
-    localStorage.removeItem('admin_token'); // or however you handle auth
+    localStorage.removeItem('admin_token');
     navigate('/admin/login');
   };
 
@@ -20,10 +19,10 @@ const AdminHeader = () => {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/admin') return 'Dashboard';
+    if (path === '/admin/calendar') return 'Calendar';
     if (path === '/admin/estimates') return 'Estimate Requests';
     if (path === '/admin/customers') return 'Customers';
     if (path === '/admin/workorders') return 'Work Orders';
-    if (path === '/admin/ai-agent') return 'AI Agent'; // NEW
     if (path.includes('/admin/customers/')) return 'Customer Details';
     if (path.includes('/admin/workorders/')) return 'Work Order Details';
     return 'Admin';
@@ -40,13 +39,19 @@ const AdminHeader = () => {
           </Link>
         </div>
 
-        {/* Center - Navigation */}
+        {/* Center - Navigation - AI AGENT REMOVED */}
         <nav className="admin-nav">
           <Link 
             to="/admin" 
             className={`nav-item ${isActivePage('/admin') ? 'active' : ''}`}
           >
             📊 Dashboard
+          </Link>
+          <Link 
+            to="/admin/calendar" 
+            className={`nav-item ${isActivePage('/admin/calendar') ? 'active' : ''}`}
+          >
+            📅 Calendar
           </Link>
           <Link 
             to="/admin/estimates" 
@@ -65,13 +70,6 @@ const AdminHeader = () => {
             className={`nav-item ${isActivePage('/admin/workorders') ? 'active' : ''}`}
           >
             🔧 Work Orders
-          </Link>
-          {/* NEW: AI Agent Navigation */}
-          <Link 
-            to="/admin/ai-agent" 
-            className={`nav-item ${isActivePage('/admin/ai-agent') ? 'active' : ''}`}
-          >
-            🤖 AI Agent
           </Link>
         </nav>
 

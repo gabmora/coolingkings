@@ -1,4 +1,4 @@
-// App.jsx - Updated with AI Agent integration
+// App.jsx - Cleaned up, removed AI Agent Dashboard
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
@@ -23,10 +23,10 @@ import AdminLogin from './components/admin/AdminLogin';
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminEstimates from './components/admin/AdminEstimates';
 import AdminHeader from './components/admin/AdminHeader';
+import AdminCalendar from './components/admin/AdminCalendar';
 
-// Import AI Agent components
+// Keep AI Chat Widget for customer pages
 import AIChatWidget from './components/AIChatWidget';
-import AIAgentDashboard from './components/admin/AIAgentDashboard';
 
 import './App.css';
 
@@ -55,6 +55,12 @@ const AppLayout = () => {
           <Route path="/admin" element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/admin/calendar" element={
+            <ProtectedRoute>
+              <AdminCalendar />
             </ProtectedRoute>
           } />
           
@@ -99,18 +105,11 @@ const AppLayout = () => {
               <AdminEstimates />
             </ProtectedRoute>
           } />
-          
-          {/* NEW: AI Agent Dashboard route */}
-          <Route path="/admin/ai-agent" element={
-            <ProtectedRoute>
-              <AIAgentDashboard />
-            </ProtectedRoute>
-          } />
         </Routes>
       </div>
       {!isAdminPage && <Footer />}
       
-      {/* NEW: Add AI Chat Widget to customer pages only */}
+      {/* AI Chat Widget on customer pages only */}
       {!isAdminPage && <AIChatWidget />}
     </>
   );

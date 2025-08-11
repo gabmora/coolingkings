@@ -1,9 +1,9 @@
-// components/admin/WorkOrderDetail.jsx - Updated with work order number and better notes handling
+// components/admin/WorkOrderDetail.jsx - Enhanced with clean design and smart scheduling
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
 import { updateWorkOrderNotes } from '../../services/workOrderService';
-import '../admin/AdminStyles.css';
+import './WorkOrderDetail.css';
 
 const WorkOrderDetail = () => {
   const { id } = useParams();
@@ -12,7 +12,17 @@ const WorkOrderDetail = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [notesValue, setNotesValue] = useState('');
+  const [scheduleData, setScheduleData] = useState({
+    scheduledDate: '',
+    scheduledTime: '',
+    technician: '',
+    estimatedDuration: '2',
+    specialInstructions: ''
+  });
+
+  
   const [formData, setFormData] = useState({
     title: '',
     service_date: '',
@@ -28,7 +38,6 @@ const WorkOrderDetail = () => {
       try {
         setLoading(true);
         
-        // Fetch work order with customer info
         const { data, error } = await supabase
           .from('work_orders')
           .select(`
@@ -58,6 +67,18 @@ const WorkOrderDetail = () => {
           notes: data.notes || ''
         });
         
+        // Pre-populate schedule data if available
+        if (data.scheduled_date) {
+          setScheduleData(prev => ({
+            ...prev,
+            scheduledDate: data.scheduled_date.split('T')[0],
+            scheduledTime: data.scheduled_time || '',
+            technician: data.assigned_technician || '',
+            estimatedDuration: data.estimated_duration || '2',
+            specialInstructions: data.special_instructions || ''
+          }));
+        }
+        
       } catch (error) {
         console.error('Error in fetchWorkOrder:', error);
       } finally {
@@ -67,133 +88,104 @@ const WorkOrderDetail = () => {
     
     fetchWorkOrder();
   }, [id, navigate]);
-  
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+
+  const handleScheduleSubmit = async () => {
+  try {
+    // Validate required fields
+    if (!scheduleData.scheduledDate || !scheduleData.scheduledTime) {
+      alert('Please select both date and time');
+      return;
+    }
+
+    // Update work order with schedule details
+    const { data, error } = await supabase
+      .from('work_orders')
+      .update({
+        status: 'scheduled',
+        scheduled_date: `${scheduleData.scheduledDate}T${scheduleData.scheduledTime}:00`,
+        scheduled_time: scheduleData.scheduledTime,
+        assigned_technician: scheduleData.technician || null,
+        estimated_duration: scheduleData.estimatedDuration || '2',
+        special_instructions: scheduleData.specialInstructions || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('Error scheduling work order:', error);
+      alert('Error scheduling work order: ' + error.message);
+      return;
+    }
+
+    // Update local state
+    setWorkOrder({ ...workOrder, ...data[0] });
+    setShowScheduleModal(false);
     
-    try {
-      // Update work order in Supabase
-      const { data, error } = await supabase
-        .from('work_orders')
-        .update({
-          ...formData,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .select();
-      
-      if (error) {
-        alert('Error updating work order: ' + error.message);
-        return;
-      }
-      
-      // Update local state with updated work order
-      setWorkOrder({
-        ...workOrder,
-        ...data[0]
-      });
-      
-      setEditing(false);
-      
-    } catch (error) {
-      console.error('Error in handleSubmit:', error);
-      alert('An unexpected error occurred');
-    }
-  };
+    // Show success message
+    alert('Work order scheduled successfully!');
+    
+  } catch (error) {
+    console.error('Error scheduling work order:', error);
+    alert('Error scheduling work order: ' + error.message);
+  }
+};
 
-  // Handle notes update separately
-  const handleNotesUpdate = async () => {
-    try {
-      const updatedOrder = await updateWorkOrderNotes(id, notesValue);
-      if (updatedOrder) {
-        setWorkOrder({
-          ...workOrder,
-          ...updatedOrder
-        });
-        setEditingNotes(false);
-      } else {
-        alert('Error updating notes');
-      }
-    } catch (error) {
-      console.error('Error updating notes:', error);
-      alert('An unexpected error occurred');
-    }
-  };
-
-  const deleteWorkOrder = async () => {
-    if (window.confirm('Are you sure you want to delete this work order? This action cannot be undone.')) {
-      try {
-        const { error } = await supabase
-          .from('work_orders')
-          .delete()
-          .eq('id', id);
-        
-        if (error) {
-          alert('Error deleting work order: ' + error.message);
-          return;
-        }
-        
-        // Redirect back to work orders list
-        navigate('/admin/workorders');
-        
-      } catch (error) {
-        console.error('Error in deleteWorkOrder:', error);
-        alert('An unexpected error occurred');
-      }
-    }
-  };
   
+
   const updateStatus = async (newStatus) => {
-    try {
-      const { data, error } = await supabase
-        .from('work_orders')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString(),
-          ...(newStatus === 'completed' ? { completed_at: new Date().toISOString() } : {}),
-          ...(newStatus === 'in-progress' ? { started_at: new Date().toISOString() } : {})
-        })
-        .eq('id', id)
-        .select();
-      
-      if (error) {
-        alert('Error updating status: ' + error.message);
-        return;
-      }
-      
-      // Update local state
-      setWorkOrder({
-        ...workOrder,
-        ...data[0]
-      });
-      
-    } catch (error) {
-      console.error('Error in updateStatus:', error);
-      alert('An unexpected error occurred');
+  try {
+    const updateData = { 
+      status: newStatus,
+      updated_at: new Date().toISOString()
+    };
+    
+    // Add started_at timestamp when starting job
+    if (newStatus === 'in-progress') {
+      updateData.started_at = new Date().toISOString();
     }
-  };
-  
-  // Format date for display
+    
+    // Add completed_at timestamp when completing
+    if (newStatus === 'completed') {
+      updateData.completed_at = new Date().toISOString();
+    }
+
+    const { data, error } = await supabase
+      .from('work_orders')
+      .update(updateData)
+      .eq('id', id)
+      .select();
+    
+    if (error) {
+      console.error('Error updating status:', error);
+      alert('Error updating status: ' + error.message);
+      return;
+    }
+    
+    // Update local state
+    setWorkOrder({
+      ...workOrder,
+      ...data[0]
+    });
+    
+  } catch (error) {
+    console.error('Error in updateStatus:', error);
+    alert('An unexpected error occurred');
+  }
+};
+
+  // Helper functions
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
   };
-  
-  // Format timestamp for display
+
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
-    
-    const date = new Date(timestamp);
-    return date.toLocaleString('en-US', {
+    return new Date(timestamp).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -202,420 +194,499 @@ const WorkOrderDetail = () => {
       hour12: true
     });
   };
-  
-  // Get status badge class
+
   const getStatusClass = (status) => {
-    switch (status) {
-      case 'pending': return 'badge-warning';
-      case 'scheduled': return 'badge-info';
-      case 'in-progress': return 'badge-primary';
-      case 'completed': return 'badge-success';
-      case 'cancelled': return 'badge-danger';
-      default: return 'badge-secondary';
-    }
+    const classes = {
+      pending: 'status-pending',
+      scheduled: 'status-scheduled',
+      'in-progress': 'status-progress',
+      completed: 'status-completed',
+      cancelled: 'status-cancelled'
+    };
+    return classes[status] || 'status-default';
   };
-  
-  // Get time preference display
-  const getTimeDisplay = (timePreference) => {
-    switch (timePreference) {
-      case 'morning': return 'Morning (8AM - 12PM)';
-      case 'afternoon': return 'Afternoon (12PM - 5PM)';
-      case 'anytime': return 'Anytime';
-      default: return timePreference;
-    }
+
+  const getPriorityClass = (priority) => {
+    const classes = {
+      low: 'priority-low',
+      normal: 'priority-normal',
+      high: 'priority-high',
+      emergency: 'priority-emergency'
+    };
+    return classes[priority] || 'priority-normal';
   };
+
+  if (loading) {
+    return (
+      <div className="work-order-detail">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading work order details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!workOrder) {
+    return (
+      <div className="work-order-detail">
+        <div className="empty-state">
+          <h2>Work Order Not Found</h2>
+          <p>The requested work order could not be located.</p>
+          <Link to="/admin/workorders" className="btn btn-primary">
+            Back to Work Orders
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-container">
-      {loading ? (
-        <div className="loading">Loading work order details...</div>
-      ) : workOrder ? (
-        <>
-          <div className="card">
-            <div className="work-order-header">
-              <div>
-                <h2>{workOrder.title}</h2>
-                {workOrder.work_order_number && (
-                  <p style={{ margin: '0.5rem 0', color: '#666', fontSize: '0.9rem' }}>
-                    Work Order: <strong>{workOrder.work_order_number}</strong>
-                  </p>
-                )}
-              </div>
-              <span className={`badge ${getStatusClass(workOrder.status)}`}>
-                {workOrder.status.charAt(0).toUpperCase() + workOrder.status.slice(1)}
+    <div className="work-order-detail">
+      {/* Header Section */}
+      <div className="detail-header">
+        <div className="header-left">
+          <div className="work-order-title">
+            <h1>{workOrder.title}</h1>
+            <div className="work-order-meta">
+              <span className="work-order-number">
+                Work Order #{workOrder.work_order_number || workOrder.id}
+              </span>
+              <span className={`status-badge ${getStatusClass(workOrder.status)}`}>
+                {workOrder.status.replace('-', ' ').toUpperCase()}
+              </span>
+              <span className={`priority-badge ${getPriorityClass(workOrder.priority)}`}>
+                {workOrder.priority.toUpperCase()} PRIORITY
               </span>
             </div>
-            
-            {/* Customer Information */}
-            <div className="section">
-              <h3>Customer Information</h3>
-              <div className="customer-details">
-                <h4>{workOrder.customers.name}</h4>
-                <div className="form-grid">
+          </div>
+        </div>
+        
+        <div className="header-actions">
+          <button className="btn btn-outline" onClick={() => setEditing(true)}>
+            ✏️ Edit Details
+          </button>
+          <Link to="/admin/workorders" className="btn btn-secondary">
+            ← Back to List
+          </Link>
+        </div>
+      </div>
+
+      <div className="detail-content">
+        {/* Customer Card */}
+        <div className="detail-card customer-card">
+          <div className="card-header">
+            <h2>👤 Customer Information</h2>
+            <Link to={`/admin/customers/${workOrder.customers.id}`} className="btn btn-sm btn-outline">
+              View Profile
+            </Link>
+          </div>
+          <div className="card-content">
+            <div className="customer-info">
+              <div className="customer-name">
+                <h3>{workOrder.customers.name}</h3>
+                <span className="customer-type">
+                  {workOrder.customers.type === 'residential' ? '🏠 Residential' : '🏢 Commercial'}
+                </span>
+              </div>
+              
+              <div className="contact-grid">
+                <div className="contact-item">
+                  <span className="contact-icon">📞</span>
                   <div>
-                    <p><strong>Phone:</strong> {workOrder.customers.phone}</p>
-                    <p><strong>Email:</strong> {workOrder.customers.email || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p>
-                      <strong>Address:</strong> 
-                      <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                          `${workOrder.customers.address}, ${workOrder.customers.city}, ${workOrder.customers.state} ${workOrder.customers.zip}`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="map-link"
-                      >
-                        {workOrder.customers.address}, {workOrder.customers.city}, {workOrder.customers.state} {workOrder.customers.zip}
-                      </a>
-                    </p>
+                    <label>Phone</label>
+                    <a href={`tel:${workOrder.customers.phone}`} className="contact-value">
+                      {workOrder.customers.phone}
+                    </a>
                   </div>
                 </div>
                 
-                <Link to={`/admin/customers/${workOrder.customers.id}`} className="btn btn-text">
-                  View Customer Details
-                </Link>
+                {workOrder.customers.email && (
+                  <div className="contact-item">
+                    <span className="contact-icon">✉️</span>
+                    <div>
+                      <label>Email</label>
+                      <a href={`mailto:${workOrder.customers.email}`} className="contact-value">
+                        {workOrder.customers.email}
+                      </a>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="contact-item address-item">
+                  <span className="contact-icon">📍</span>
+                  <div>
+                    <label>Address</label>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                        `${workOrder.customers.address}, ${workOrder.customers.city}, ${workOrder.customers.state} ${workOrder.customers.zip}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="contact-value address-link"
+                    >
+                      {workOrder.customers.address}<br />
+                      {workOrder.customers.city}, {workOrder.customers.state} {workOrder.customers.zip}
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            {/* Work Order Details */}
-            {editing ? (
-              <form onSubmit={handleSubmit}>
-                <div className="section">
-                  <h3>Edit Work Order</h3>
-                  
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="title">Work Order Title</label>
-                      <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        className="form-control"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="form-group">
-                      <label htmlFor="service_type">Service Type</label>
-                      <select
-                        id="service_type"
-                        name="service_type"
-                        className="form-control"
-                        value={formData.service_type}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="repair">Repair</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="installation">Installation</option>
-                        <option value="inspection">Inspection</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label htmlFor="service_date">Service Date</label>
-                      <input
-                        type="date"
-                        id="service_date"
-                        name="service_date"
-                        className="form-control"
-                        value={formData.service_date}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="form-group">
-                      <label htmlFor="time_preference">Preferred Time</label>
-                      <select
-                        id="time_preference"
-                        name="time_preference"
-                        className="form-control"
-                        value={formData.time_preference}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="morning">Morning (8AM - 12PM)</option>
-                        <option value="afternoon">Afternoon (12PM - 5PM)</option>
-                        <option value="anytime">Anytime</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="priority">Priority</label>
-                    <select
-                      id="priority"
-                      name="priority"
-                      className="form-control"
-                      value={formData.priority}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="low">Low</option>
-                      <option value="normal">Normal</option>
-                      <option value="high">High</option>
-                      <option value="emergency">Emergency</option>
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="description">Description</label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      className="form-control"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows="3"
-                      required
-                    ></textarea>
-                  </div>
-                  
-                  <div className="form-actions">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={() => {
-                        setFormData({
-                          title: workOrder.title,
-                          service_date: workOrder.service_date,
-                          time_preference: workOrder.time_preference,
-                          service_type: workOrder.service_type,
-                          priority: workOrder.priority,
-                          description: workOrder.description,
-                          notes: workOrder.notes || ''
-                        });
-                        setEditing(false);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary"
-                    >
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
-              </form>
-            ) : (
-              <div className="section">
-                <h3>Work Order Details</h3>
-                
-                <div className="detail-grid">
-                  <div className="detail-item">
-                    <div className="detail-label">Service Date:</div>
-                    <div className="detail-value">{formatDate(workOrder.service_date)}</div>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <div className="detail-label">Preferred Time:</div>
-                    <div className="detail-value">{getTimeDisplay(workOrder.time_preference)}</div>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <div className="detail-label">Service Type:</div>
-                    <div className="detail-value">
-                      {workOrder.service_type.charAt(0).toUpperCase() + workOrder.service_type.slice(1)}
-                    </div>
-                  </div>
-                  
-                  <div className="detail-item">
-                    <div className="detail-label">Priority:</div>
-                    <div className="detail-value">
-                      {workOrder.priority.charAt(0).toUpperCase() + workOrder.priority.slice(1)}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="detail-item">
-                  <div className="detail-label">Description:</div>
-                  <div className="detail-value">{workOrder.description}</div>
-                </div>
-                
-                <div className="form-actions">
-                  <button 
-                    className="btn btn-primary" 
-                    onClick={() => setEditing(true)}
-                  >
-                    Edit Details
-                  </button>
-                </div>
-              </div>
-            )}
+          </div>
+        </div>
 
-            {/* Notes Section - Separate from main form */}
-            <div className="section">
-              <h3>Technical Notes</h3>
-              {editingNotes ? (
-                <div>
-                  <div className="form-group">
-                    <textarea
-                      className="form-control"
-                      value={notesValue}
-                      onChange={(e) => setNotesValue(e.target.value)}
-                      rows="6"
-                      placeholder="Add technical notes, findings, parts used, etc..."
-                    />
-                  </div>
-                  <div className="form-actions">
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary" 
-                      onClick={() => {
-                        setNotesValue(workOrder.notes || '');
-                        setEditingNotes(false);
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="button" 
-                      className="btn btn-primary"
-                      onClick={handleNotesUpdate}
-                    >
-                      Save Notes
-                    </button>
-                  </div>
-                </div>
+        {/* Service Details Card */}
+        <div className="detail-card service-card">
+          <div className="card-header">
+            <h2>🔧 Service Details</h2>
+            <div className="service-dates">
+              {workOrder.scheduled_date ? (
+                <span className="scheduled-date">
+                  📅 Scheduled: {formatDate(workOrder.scheduled_date)}
+                </span>
               ) : (
-                <div>
-                  <div className="detail-item">
-                    <div className="detail-value" style={{ 
-                      backgroundColor: '#f8f9fa', 
-                      padding: '1rem', 
-                      borderRadius: '4px',
-                      minHeight: '100px',
-                      whiteSpace: 'pre-wrap'
-                    }}>
-                      {workOrder.notes || 'No notes added yet.'}
-                    </div>
-                  </div>
-                  <div className="form-actions">
-                    <button 
-                      className="btn btn-primary" 
-                      onClick={() => setEditingNotes(true)}
-                    >
-                      Edit Notes
-                    </button>
-                  </div>
+                <span className="requested-date">
+                  📋 Requested: {formatDate(workOrder.service_date)}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="card-content">
+            <div className="service-grid">
+              <div className="service-item">
+                <label>Service Type</label>
+                <span className="service-value">
+                  {workOrder.service_type.charAt(0).toUpperCase() + workOrder.service_type.slice(1)}
+                </span>
+              </div>
+              
+              <div className="service-item">
+                <label>Original Request Date</label>
+                <span className="service-value">
+                  {formatDate(workOrder.service_date)}
+                </span>
+              </div>
+              
+              {workOrder.scheduled_date && (
+                <div className="service-item">
+                  <label>Scheduled Date & Time</label>
+                  <span className="service-value">
+                    {formatDate(workOrder.scheduled_date)}
+                    {workOrder.scheduled_time && ` at ${workOrder.scheduled_time}`}
+                  </span>
+                </div>
+              )}
+              
+              <div className="service-item">
+                <label>Time Preference</label>
+                <span className="service-value">
+                  {workOrder.time_preference === 'morning' ? 'Morning (8AM - 12PM)' :
+                  workOrder.time_preference === 'afternoon' ? 'Afternoon (12PM - 5PM)' : 'Anytime'}
+                </span>
+              </div>
+              
+              {workOrder.assigned_technician && (
+                <div className="service-item">
+                  <label>Assigned Technician</label>
+                  <span className="service-value">{workOrder.assigned_technician}</span>
+                </div>
+              )}
+              
+              {workOrder.estimated_duration && (
+                <div className="service-item">
+                  <label>Estimated Duration</label>
+                  <span className="service-value">{workOrder.estimated_duration} hours</span>
                 </div>
               )}
             </div>
             
-            {/* Status Timeline */}
-            <div className="section">
-              <h3>Status</h3>
-              
-              <div className="status-timeline">
-                <div className="timeline-item">
-                  <div className="timeline-marker"></div>
-                  <div className="timeline-content">
-                    <div className="timeline-date">{formatTimestamp(workOrder.created_at)}</div>
-                    <p>Work order created</p>
-                  </div>
-                </div>
-                
-                {workOrder.status !== 'pending' && (
-                  <div className="timeline-item">
-                    <div className="timeline-marker"></div>
-                    <div className="timeline-content">
-                      <div className="timeline-date">{formatTimestamp(workOrder.updated_at)}</div>
-                      <p>Status updated to {workOrder.status}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {workOrder.completed_at && (
-                  <div className="timeline-item">
-                    <div className="timeline-marker"></div>
-                    <div className="timeline-content">
-                      <div className="timeline-date">{formatTimestamp(workOrder.completed_at)}</div>
-                      <p>Work order completed</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="status-actions">
-                {/* Status-specific buttons */}
-                {workOrder.status === 'pending' && (
-                  <>
-                    <button 
-                      className="btn btn-primary" 
-                      onClick={() => updateStatus('scheduled')}
-                    >
-                      Schedule
-                    </button>
-                    <button 
-                      className="btn btn-success" 
-                      onClick={() => updateStatus('in-progress')}
-                    >
-                      Start Job
-                    </button>
-                  </>
-                )}
-                
-                {workOrder.status === 'scheduled' && (
-                  <button 
-                    className="btn btn-success" 
-                    onClick={() => updateStatus('in-progress')}
-                  >
-                    Start Job
-                  </button>
-                )}
-                
-                {workOrder.status === 'in-progress' && (
-                  <button 
-                    className="btn btn-success" 
-                    onClick={() => updateStatus('completed')}
-                  >
-                    Complete
-                  </button>
-                )}
-                
-                {workOrder.status !== 'completed' && workOrder.status !== 'cancelled' && (
-                  <button 
-                    className="btn btn-danger" 
-                    onClick={() => updateStatus('cancelled')}
-                  >
-                    Cancel
-                  </button>
-                )}
-                
-                {workOrder.status === 'completed' && (
-                  <button 
-                    className="btn btn-success" 
-                    disabled
-                  >
-                    Completed
-                  </button>
-                )}
-
-                {/* Delete button - displayed regardless of status */}
-                <button 
-                  className="btn btn-danger" 
-                  onClick={deleteWorkOrder}
-                  style={{ marginLeft: 'auto' }}
-                >
-                  Delete
-                </button>
+            <div className="description-section">
+              <label>Description</label>
+              <div className="description-content">
+                {workOrder.description}
               </div>
             </div>
           </div>
-        </>
-      ) : (
-        <div className="card">
-          <div className="empty-state">
-            <p>Work order not found</p>
+        </div>
+
+        {/* Technical Notes Card */}
+        <div className="detail-card notes-card">
+          <div className="card-header">
+            <h2>📝 Technical Notes</h2>
+            <button 
+              className="btn btn-sm btn-outline" 
+              onClick={() => setEditingNotes(true)}
+            >
+              {workOrder.notes ? 'Edit Notes' : 'Add Notes'}
+            </button>
+          </div>
+          <div className="card-content">
+            {editingNotes ? (
+              <div className="notes-editor">
+                <textarea
+                  value={notesValue}
+                  onChange={(e) => setNotesValue(e.target.value)}
+                  placeholder="Add technical notes, findings, parts used, completion details..."
+                  rows="6"
+                  className="notes-textarea"
+                />
+                <div className="notes-actions">
+                  <button 
+                    className="btn btn-secondary" 
+                    onClick={() => {
+                      setNotesValue(workOrder.notes || '');
+                      setEditingNotes(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    className="btn btn-primary"
+                    onClick={async () => {
+                      try {
+                        const { error } = await supabase
+                          .from('work_orders')
+                          .update({ notes: notesValue })
+                          .eq('id', id);
+                        
+                        if (error) throw error;
+                        
+                        setWorkOrder({ ...workOrder, notes: notesValue });
+                        setEditingNotes(false);
+                      } catch (error) {
+                        alert('Error updating notes: ' + error.message);
+                      }
+                    }}
+                  >
+                    Save Notes
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="notes-display">
+                {workOrder.notes ? (
+                  <pre className="notes-content">{workOrder.notes}</pre>
+                ) : (
+                  <div className="no-notes">
+                    <span className="no-notes-icon">📄</span>
+                    <p>No technical notes added yet.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Status & Actions Card */}
+        <div className="detail-card status-card">
+          <div className="card-header">
+            <h2>⚡ Status & Actions</h2>
+            <div className="status-info">
+              <span>Created {formatTimestamp(workOrder.created_at)}</span>
+            </div>
+          </div>
+          <div className="card-content">
+            <div className="status-timeline">
+              <div className="timeline-item completed">
+                <div className="timeline-marker">✓</div>
+                <div className="timeline-content">
+                  <span className="timeline-label">Created: </span>
+                  <span className="timeline-date">{formatTimestamp(workOrder.created_at)}</span>
+                </div>
+              </div>
+              
+              {workOrder.status !== 'pending' && (
+                <div className={`timeline-item ${workOrder.status === 'scheduled' || workOrder.status === 'in-progress' || workOrder.status === 'completed' ? 'completed' : ''}`}>
+                  <div className="timeline-marker">📅</div>
+                  <div className="timeline-content">
+                    <span className="timeline-label">Scheduled: </span>
+                    <span className="timeline-date">
+                      {workOrder.scheduled_date ? formatTimestamp(workOrder.scheduled_date) : 'Pending'}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {(workOrder.status === 'in-progress' || workOrder.status === 'completed') && (
+                <div className={`timeline-item ${workOrder.status === 'in-progress' || workOrder.status === 'completed' ? 'completed' : ''}`}>
+                  <div className="timeline-marker">🔧</div>
+                  <div className="timeline-content">
+                    <span className="timeline-label">In Progress: </span>
+                    <span className="timeline-date">
+                      {workOrder.started_at ? formatTimestamp(workOrder.started_at) : 'Not started'}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {workOrder.status === 'completed' && (
+                <div className="timeline-item completed">
+                  <div className="timeline-marker">✅</div>
+                  <div className="timeline-content">
+                    <span className="timeline-label">Completed</span>
+                    <span className="timeline-date">{formatTimestamp(workOrder.completed_at)}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="action-buttons">
+              {workOrder.status === 'pending' && (
+                <>
+                  <button 
+                    className="btn btn-primary action-btn"
+                    onClick={() => setShowScheduleModal(true)}
+                  >
+                    📅 Schedule Appointment
+                  </button>
+                  <button 
+                    className="btn btn-success action-btn"
+                    onClick={() => updateStatus('in-progress')}
+                  >
+                    🚀 Start Job Now
+                  </button>
+                </>
+              )}
+              
+              {workOrder.status === 'scheduled' && (
+                <button 
+                  className="btn btn-success action-btn"
+                  onClick={() => updateStatus('in-progress')}
+                >
+                  🚀 Start Job
+                </button>
+              )}
+              
+              {workOrder.status === 'in-progress' && (
+                <button 
+                  className="btn btn-success action-btn"
+                  onClick={() => updateStatus('completed')}
+                >
+                  ✅ Mark Complete
+                </button>
+              )}
+              
+              {workOrder.status !== 'completed' && workOrder.status !== 'cancelled' && (
+                <button 
+                  className="btn btn-danger action-btn"
+                  onClick={() => updateStatus('cancelled')}
+                >
+                  ❌ Cancel Order
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Schedule Modal */}
+      {showScheduleModal && (
+        <div className="modal-overlay" onClick={() => setShowScheduleModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>📅 Schedule Appointment</h2>
+              <button 
+                className="modal-close"
+                onClick={() => setShowScheduleModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="schedule-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Date</label>
+                    <input
+                      type="date"
+                      value={scheduleData.scheduledDate}
+                      onChange={(e) => setScheduleData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="form-control"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Time</label>
+                    <select
+                      value={scheduleData.scheduledTime}
+                      onChange={(e) => setScheduleData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                      className="form-control"
+                    >
+                      <option value="">Select time</option>
+                      <option value="08:00">8:00 AM</option>
+                      <option value="09:00">9:00 AM</option>
+                      <option value="10:00">10:00 AM</option>
+                      <option value="11:00">11:00 AM</option>
+                      <option value="13:00">1:00 PM</option>
+                      <option value="14:00">2:00 PM</option>
+                      <option value="15:00">3:00 PM</option>
+                      <option value="16:00">4:00 PM</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Assigned Technician</label>
+                    <select
+                      value={scheduleData.technician}
+                      onChange={(e) => setScheduleData(prev => ({ ...prev, technician: e.target.value }))}
+                      className="form-control"
+                    >
+                      <option value="">Select technician</option>
+                      <option value="John Smith">John Smith</option>
+                      <option value="Mike Johnson">Mike Johnson</option>
+                      <option value="Dave Wilson">Dave Wilson</option>
+                      <option value="Tom Brown">Tom Brown</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Estimated Duration</label>
+                    <select
+                      value={scheduleData.estimatedDuration}
+                      onChange={(e) => setScheduleData(prev => ({ ...prev, estimatedDuration: e.target.value }))}
+                      className="form-control"
+                    >
+                      <option value="1">1 hour</option>
+                      <option value="2">2 hours</option>
+                      <option value="3">3 hours</option>
+                      <option value="4">4 hours</option>
+                      <option value="8">Full day</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="form-group">
+                  <label>Special Instructions</label>
+                  <textarea
+                    value={scheduleData.specialInstructions}
+                    onChange={(e) => setScheduleData(prev => ({ ...prev, specialInstructions: e.target.value }))}
+                    placeholder="Any special instructions for the technician..."
+                    rows="3"
+                    className="form-control"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="modal-footer">
+              <button 
+                className="btn btn-secondary"
+                onClick={() => setShowScheduleModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={handleScheduleSubmit}
+                disabled={!scheduleData.scheduledDate || !scheduleData.scheduledTime}
+              >
+                📅 Schedule & Create Calendar Event
+              </button>
+            </div>
           </div>
         </div>
       )}
