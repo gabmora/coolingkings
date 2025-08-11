@@ -48,6 +48,15 @@ const AdminHeader = () => {
             📊 Dashboard
           </Link>
           <Link 
+            to="/admin/map" 
+            className={`nav-item ${isActivePage('/admin/map') ? 'active' : ''}`}
+          >
+            🗺️ Map
+          </Link>
+          <Link to="/admin/geocoding-setup" className="nav-item">
+            🗺️ Setup Geocoding
+          </Link>
+          <Link 
             to="/admin/calendar" 
             className={`nav-item ${isActivePage('/admin/calendar') ? 'active' : ''}`}
           >
