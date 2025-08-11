@@ -24,6 +24,8 @@ import ProtectedRoute from './components/admin/ProtectedRoute';
 import AdminEstimates from './components/admin/AdminEstimates';
 import AdminHeader from './components/admin/AdminHeader';
 import AdminCalendar from './components/admin/AdminCalendar';
+import MapDashboard from './components/admin/MapDashboard';
+import GeocodingSetup from './components/admin/GeocodingSetup';
 
 // Keep AI Chat Widget for customer pages
 import AIChatWidget from './components/AIChatWidget';
@@ -51,6 +53,8 @@ const AppLayout = () => {
           
           {/* Admin routes (protected) */}
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/map" element={<MapDashboard />} />
+          <Route path="/admin/geocoding-setup" element={<GeocodingSetup />} />
           
           <Route path="/admin" element={
             <ProtectedRoute>

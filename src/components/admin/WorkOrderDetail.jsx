@@ -1,4 +1,4 @@
-// components/admin/WorkOrderDetail.jsx - Enhanced with clean design and smart scheduling
+// components/admin/WorkOrderDetail.jsx - Updated for new normalized schema
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
@@ -9,6 +9,10 @@ const WorkOrderDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [workOrder, setWorkOrder] = useState(null);
+  const [inspectionReport, setInspectionReport] = useState(null);
+  const [workOrderTasks, setWorkOrderTasks] = useState([]);
+  const [equipment, setEquipment] = useState(null);
+  const [technicians, setTechnicians] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
@@ -22,7 +26,6 @@ const WorkOrderDetail = () => {
     specialInstructions: ''
   });
 
-  
   const [formData, setFormData] = useState({
     title: '',
     service_date: '',
@@ -38,44 +41,90 @@ const WorkOrderDetail = () => {
       try {
         setLoading(true);
         
-        const { data, error } = await supabase
+        // 1. Fetch core work order with customer data
+        const { data: workOrderData, error: workOrderError } = await supabase
           .from('work_orders')
           .select(`
             *,
-            customers (
-              *
-            )
+            customers (*)
           `)
           .eq('id', id)
           .single();
         
-        if (error) {
-          console.error('Error fetching work order:', error);
+        if (workOrderError) {
+          console.error('Error fetching work order:', workOrderError);
           navigate('/admin/workorders');
           return;
         }
         
-        setWorkOrder(data);
-        setNotesValue(data.notes || '');
+        setWorkOrder(workOrderData);
+        setNotesValue(workOrderData.notes || '');
         setFormData({
-          title: data.title,
-          service_date: data.service_date,
-          time_preference: data.time_preference,
-          service_type: data.service_type,
-          priority: data.priority,
-          description: data.description,
-          notes: data.notes || ''
+          title: workOrderData.title,
+          service_date: workOrderData.service_date,
+          time_preference: workOrderData.time_preference,
+          service_type: workOrderData.service_type,
+          priority: workOrderData.priority,
+          description: workOrderData.description,
+          notes: workOrderData.notes || ''
         });
+
+        // 2. Fetch inspection report data (if exists)
+        const { data: inspectionData, error: inspectionError } = await supabase
+          .from('inspection_reports')
+          .select('*')
+          .eq('work_order_id', id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (!inspectionError && inspectionData) {
+          setInspectionReport(inspectionData);
+        }
+
+        // 3. Fetch equipment data (if work order has equipment_id)
+        if (workOrderData.equipment_id) {
+          const { data: equipmentData, error: equipmentError } = await supabase
+            .from('equipment')
+            .select('*')
+            .eq('id', workOrderData.equipment_id)
+            .single();
+          
+          if (!equipmentError && equipmentData) {
+            setEquipment(equipmentData);
+          }
+        }
+
+        // 4. Fetch work order tasks
+        const { data: tasksData, error: tasksError } = await supabase
+          .from('work_order_tasks')
+          .select('*')
+          .eq('work_order_id', id)
+          .order('created_at', { ascending: true });
+        
+        if (!tasksError && tasksData) {
+          setWorkOrderTasks(tasksData);
+        }
+
+        // 5. Fetch technicians for scheduling
+        const { data: techniciansData, error: techniciansError } = await supabase
+          .from('technicians')
+          .select('id, name')
+          .eq('active', true);
+        
+        if (!techniciansError && techniciansData) {
+          setTechnicians(techniciansData);
+        }
         
         // Pre-populate schedule data if available
-        if (data.scheduled_date) {
+        if (workOrderData.scheduled_date) {
           setScheduleData(prev => ({
             ...prev,
-            scheduledDate: data.scheduled_date.split('T')[0],
-            scheduledTime: data.scheduled_time || '',
-            technician: data.assigned_technician || '',
-            estimatedDuration: data.estimated_duration || '2',
-            specialInstructions: data.special_instructions || ''
+            scheduledDate: workOrderData.scheduled_date.split('T')[0],
+            scheduledTime: workOrderData.scheduled_time || '',
+            technician: workOrderData.technician_id || '',
+            estimatedDuration: workOrderData.estimated_duration || '2',
+            specialInstructions: workOrderData.special_instructions || ''
           }));
         }
         
@@ -90,89 +139,95 @@ const WorkOrderDetail = () => {
   }, [id, navigate]);
 
   const handleScheduleSubmit = async () => {
-  try {
-    // Validate required fields
-    if (!scheduleData.scheduledDate || !scheduleData.scheduledTime) {
-      alert('Please select both date and time');
-      return;
-    }
+    try {
+      // Validate required fields
+      if (!scheduleData.scheduledDate || !scheduleData.scheduledTime) {
+        alert('Please select both date and time');
+        return;
+      }
 
-    // Update work order with schedule details
-    const { data, error } = await supabase
-      .from('work_orders')
-      .update({
-        status: 'scheduled',
-        scheduled_date: `${scheduleData.scheduledDate}T${scheduleData.scheduledTime}:00`,
-        scheduled_time: scheduleData.scheduledTime,
-        assigned_technician: scheduleData.technician || null,
-        estimated_duration: scheduleData.estimatedDuration || '2',
-        special_instructions: scheduleData.specialInstructions || null,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .select();
+      // Update work order with schedule details
+      const { data, error } = await supabase
+        .from('work_orders')
+        .update({
+          status: 'scheduled',
+          scheduled_date: `${scheduleData.scheduledDate}T${scheduleData.scheduledTime}:00`,
+          scheduled_start_time: scheduleData.scheduledTime,
+          scheduled_end_time: calculateEndTime(scheduleData.scheduledTime, scheduleData.estimatedDuration),
+          technician_id: scheduleData.technician || null,
+          estimated_duration: scheduleData.estimatedDuration || '2',
+          special_instructions: scheduleData.specialInstructions || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select();
 
-    if (error) {
+      if (error) {
+        console.error('Error scheduling work order:', error);
+        alert('Error scheduling work order: ' + error.message);
+        return;
+      }
+
+      // Update local state
+      setWorkOrder({ ...workOrder, ...data[0] });
+      setShowScheduleModal(false);
+      
+      // Show success message
+      alert('Work order scheduled successfully!');
+      
+    } catch (error) {
       console.error('Error scheduling work order:', error);
       alert('Error scheduling work order: ' + error.message);
-      return;
     }
+  };
 
-    // Update local state
-    setWorkOrder({ ...workOrder, ...data[0] });
-    setShowScheduleModal(false);
-    
-    // Show success message
-    alert('Work order scheduled successfully!');
-    
-  } catch (error) {
-    console.error('Error scheduling work order:', error);
-    alert('Error scheduling work order: ' + error.message);
-  }
-};
-
-  
+  const calculateEndTime = (startTime, durationHours) => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const endHours = hours + parseInt(durationHours);
+    return `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
 
   const updateStatus = async (newStatus) => {
-  try {
-    const updateData = { 
-      status: newStatus,
-      updated_at: new Date().toISOString()
-    };
-    
-    // Add started_at timestamp when starting job
-    if (newStatus === 'in-progress') {
-      updateData.started_at = new Date().toISOString();
-    }
-    
-    // Add completed_at timestamp when completing
-    if (newStatus === 'completed') {
-      updateData.completed_at = new Date().toISOString();
-    }
+    try {
+      const updateData = { 
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      };
+      
+      // Add started_at timestamp when starting job
+      if (newStatus === 'in-progress') {
+        updateData.actual_start_time = new Date().toISOString();
+      }
+      
+      // Add completed_at timestamp when completing
+      if (newStatus === 'completed') {
+        updateData.completed_at = new Date().toISOString();
+        updateData.actual_end_time = new Date().toISOString();
+      }
 
-    const { data, error } = await supabase
-      .from('work_orders')
-      .update(updateData)
-      .eq('id', id)
-      .select();
-    
-    if (error) {
-      console.error('Error updating status:', error);
-      alert('Error updating status: ' + error.message);
-      return;
+      const { data, error } = await supabase
+        .from('work_orders')
+        .update(updateData)
+        .eq('id', id)
+        .select();
+      
+      if (error) {
+        console.error('Error updating status:', error);
+        alert('Error updating status: ' + error.message);
+        return;
+      }
+      
+      // Update local state
+      setWorkOrder({
+        ...workOrder,
+        ...data[0]
+      });
+      
+    } catch (error) {
+      console.error('Error in updateStatus:', error);
+      alert('An unexpected error occurred');
     }
-    
-    // Update local state
-    setWorkOrder({
-      ...workOrder,
-      ...data[0]
-    });
-    
-  } catch (error) {
-    console.error('Error in updateStatus:', error);
-    alert('An unexpected error occurred');
-  }
-};
+  };
 
   // Helper functions
   const formatDate = (dateString) => {
@@ -211,9 +266,15 @@ const WorkOrderDetail = () => {
       low: 'priority-low',
       normal: 'priority-normal',
       high: 'priority-high',
+      urgent: 'priority-high',
       emergency: 'priority-emergency'
     };
     return classes[priority] || 'priority-normal';
+  };
+
+  const getTechnicianName = (technicianId) => {
+    const technician = technicians.find(t => t.id === technicianId);
+    return technician ? technician.name : 'Unassigned';
   };
 
   if (loading) {
@@ -250,7 +311,7 @@ const WorkOrderDetail = () => {
             <h1>{workOrder.title}</h1>
             <div className="work-order-meta">
               <span className="work-order-number">
-                Work Order #{workOrder.work_order_number || workOrder.id}
+                Work Order #{workOrder.work_order_number || workOrder.id.slice(0, 8)}
               </span>
               <span className={`status-badge ${getStatusClass(workOrder.status)}`}>
                 {workOrder.status.replace('-', ' ').toUpperCase()}
@@ -372,7 +433,7 @@ const WorkOrderDetail = () => {
                   <label>Scheduled Date & Time</label>
                   <span className="service-value">
                     {formatDate(workOrder.scheduled_date)}
-                    {workOrder.scheduled_time && ` at ${workOrder.scheduled_time}`}
+                    {workOrder.scheduled_start_time && ` at ${workOrder.scheduled_start_time}`}
                   </span>
                 </div>
               )}
@@ -385,12 +446,10 @@ const WorkOrderDetail = () => {
                 </span>
               </div>
               
-              {workOrder.assigned_technician && (
-                <div className="service-item">
-                  <label>Assigned Technician</label>
-                  <span className="service-value">{workOrder.assigned_technician}</span>
-                </div>
-              )}
+              <div className="service-item">
+                <label>Assigned Technician</label>
+                <span className="service-value">{getTechnicianName(workOrder.technician_id)}</span>
+              </div>
               
               {workOrder.estimated_duration && (
                 <div className="service-item">
@@ -408,6 +467,121 @@ const WorkOrderDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Equipment Information Card */}
+        {equipment && (
+          <div className="detail-card equipment-card">
+            <div className="card-header">
+              <h2>⚙️ Equipment Information</h2>
+            </div>
+            <div className="card-content">
+              <div className="service-grid">
+                <div className="service-item">
+                  <label>Equipment Type</label>
+                  <span className="service-value">{equipment.equipment_type || 'Not specified'}</span>
+                </div>
+                <div className="service-item">
+                  <label>Location</label>
+                  <span className="service-value">{equipment.location || 'Not specified'}</span>
+                </div>
+                <div className="service-item">
+                  <label>Brand</label>
+                  <span className="service-value">{equipment.brand || 'Not specified'}</span>
+                </div>
+                <div className="service-item">
+                  <label>Model</label>
+                  <span className="service-value">{equipment.model || 'Not specified'}</span>
+                </div>
+                <div className="service-item">
+                  <label>Serial Number</label>
+                  <span className="service-value">{equipment.serial_number || 'Not specified'}</span>
+                </div>
+                <div className="service-item">
+                  <label>Warranty Status</label>
+                  <span className="service-value">{equipment.warranty_status || 'Not specified'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Inspection Report Card */}
+        {inspectionReport && (
+          <div className="detail-card inspection-card">
+            <div className="card-header">
+              <h2>🔍 Inspection Report</h2>
+              <span className="inspection-date">
+                {formatTimestamp(inspectionReport.created_at)}
+              </span>
+            </div>
+            <div className="card-content">
+              <div className="service-grid">
+                {inspectionReport.mca && (
+                  <div className="service-item">
+                    <label>MCA</label>
+                    <span className="service-value">{inspectionReport.mca}</span>
+                  </div>
+                )}
+                {inspectionReport.mocp && (
+                  <div className="service-item">
+                    <label>MOCP</label>
+                    <span className="service-value">{inspectionReport.mocp}</span>
+                  </div>
+                )}
+                {inspectionReport.temp_split && (
+                  <div className="service-item">
+                    <label>Temperature Split</label>
+                    <span className="service-value">{inspectionReport.temp_split}°F</span>
+                  </div>
+                )}
+                {inspectionReport.static_pressure && (
+                  <div className="service-item">
+                    <label>Static Pressure</label>
+                    <span className="service-value">{inspectionReport.static_pressure} in WC</span>
+                  </div>
+                )}
+              </div>
+              
+              {inspectionReport.inspection_items && inspectionReport.inspection_items.length > 0 && (
+                <div className="inspection-items">
+                  <label>Inspection Items Completed:</label>
+                  <div className="inspection-list">
+                    {inspectionReport.inspection_items.map((item, index) => (
+                      <span key={index} className="inspection-tag">
+                        ✓ {item.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Work Order Tasks */}
+        {workOrderTasks.length > 0 && (
+          <div className="detail-card tasks-card">
+            <div className="card-header">
+              <h2>📋 Task Checklist</h2>
+              <span className="task-count">
+                {workOrderTasks.filter(t => t.status === 'completed').length} / {workOrderTasks.length} completed
+              </span>
+            </div>
+            <div className="card-content">
+              <div className="task-list">
+                {workOrderTasks.map(task => (
+                  <div key={task.id} className={`task-item ${task.status}`}>
+                    <span className="task-status">{task.status === 'completed' ? '✅' : '⏳'}</span>
+                    <span className="task-name">{task.task_name}</span>
+                    {task.time_spent_minutes && (
+                      <span className="task-time">{task.time_spent_minutes}min</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Technical Notes Card */}
         <div className="detail-card notes-card">
@@ -513,7 +687,7 @@ const WorkOrderDetail = () => {
                   <div className="timeline-content">
                     <span className="timeline-label">In Progress: </span>
                     <span className="timeline-date">
-                      {workOrder.started_at ? formatTimestamp(workOrder.started_at) : 'Not started'}
+                      {workOrder.actual_start_time ? formatTimestamp(workOrder.actual_start_time) : 'Not started'}
                     </span>
                   </div>
                 </div>
@@ -636,10 +810,9 @@ const WorkOrderDetail = () => {
                       className="form-control"
                     >
                       <option value="">Select technician</option>
-                      <option value="John Smith">John Smith</option>
-                      <option value="Mike Johnson">Mike Johnson</option>
-                      <option value="Dave Wilson">Dave Wilson</option>
-                      <option value="Tom Brown">Tom Brown</option>
+                      {technicians.map(tech => (
+                        <option key={tech.id} value={tech.id}>{tech.name}</option>
+                      ))}
                     </select>
                   </div>
                   
@@ -684,7 +857,7 @@ const WorkOrderDetail = () => {
                 onClick={handleScheduleSubmit}
                 disabled={!scheduleData.scheduledDate || !scheduleData.scheduledTime}
               >
-                📅 Schedule & Create Calendar Event
+                📅 Schedule Appointment
               </button>
             </div>
           </div>
