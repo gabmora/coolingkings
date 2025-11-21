@@ -1,0 +1,192 @@
+/* ============================================
+   ADMIN DESIGN SYSTEM
+   K&E HVAC - Matches Public Website Design
+   ============================================ */
+
+:root {
+  /* ============================================
+     BRAND COLORS (Match Public Website)
+     ============================================ */
+  --admin-primary: #002f6c;
+  --admin-primary-dark: #001f4d;
+  --admin-primary-light: #004e9a;
+
+  --admin-secondary: #ff6b35;
+  --admin-secondary-dark: #e55a2b;
+  --admin-secondary-light: #ff8558;
+
+  --admin-accent: #f7931e;
+  --admin-accent-dark: #d87f1a;
+
+  /* ============================================
+     STATUS COLORS (Standardized)
+     ============================================ */
+  --admin-status-pending: #ffc107;
+  --admin-status-scheduled: #17a2b8;
+  --admin-status-inprogress: #007bff;
+  --admin-status-completed: #28a745;
+  --admin-status-cancelled: #6c757d;
+  --admin-status-urgent: #dc3545;
+  --admin-status-emergency: #c82333;
+
+  /* ============================================
+     GRAYS (Unified Scale)
+     ============================================ */
+  --admin-gray-50: #f8f9fa;
+  --admin-gray-100: #f1f3f5;
+  --admin-gray-200: #e9ecef;
+  --admin-gray-300: #dee2e6;
+  --admin-gray-400: #ced4da;
+  --admin-gray-500: #adb5bd;
+  --admin-gray-600: #6c757d;
+  --admin-gray-700: #495057;
+  --admin-gray-800: #343a40;
+  --admin-gray-900: #212529;
+
+  /* ============================================
+     SEMANTIC COLORS
+     ============================================ */
+  --admin-success: #28a745;
+  --admin-success-light: #d4edda;
+  --admin-success-dark: #155724;
+
+  --admin-warning: #ffc107;
+  --admin-warning-light: #fff3cd;
+  --admin-warning-dark: #856404;
+
+  --admin-danger: #dc3545;
+  --admin-danger-light: #f8d7da;
+  --admin-danger-dark: #721c24;
+
+  --admin-info: #17a2b8;
+  --admin-info-light: #d1ecf1;
+  --admin-info-dark: #0c5460;
+
+  /* ============================================
+     BACKGROUNDS
+     ============================================ */
+  --admin-bg-body: #f8f9fa;
+  --admin-bg-surface: #ffffff;
+  --admin-bg-elevated: #ffffff;
+  --admin-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* ============================================
+     TEXT COLORS
+     ============================================ */
+  --admin-text-primary: #212529;
+  --admin-text-secondary: #6c757d;
+  --admin-text-tertiary: #adb5bd;
+  --admin-text-inverse: #ffffff;
+
+  /* ============================================
+     BORDERS
+     ============================================ */
+  --admin-border-color: #dee2e6;
+  --admin-border-light: #e9ecef;
+  --admin-border-dark: #ced4da;
+
+  /* ============================================
+     SPACING SCALE (4px base)
+     ============================================ */
+  --admin-space-1: 4px;
+  --admin-space-2: 8px;
+  --admin-space-3: 12px;
+  --admin-space-4: 16px;
+  --admin-space-5: 20px;
+  --admin-space-6: 24px;
+  --admin-space-8: 32px;
+  --admin-space-10: 40px;
+  --admin-space-12: 48px;
+  --admin-space-16: 64px;
+  --admin-space-20: 80px;
+  --admin-space-24: 96px;
+
+  /* ============================================
+     TYPOGRAPHY
+     ============================================ */
+  --admin-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  --admin-font-size-xs: 0.75rem;    /* 12px */
+  --admin-font-size-sm: 0.875rem;   /* 14px */
+  --admin-font-size-base: 1rem;     /* 16px */
+  --admin-font-size-lg: 1.125rem;   /* 18px */
+  --admin-font-size-xl: 1.25rem;    /* 20px */
+  --admin-font-size-2xl: 1.5rem;    /* 24px */
+  --admin-font-size-3xl: 1.875rem;  /* 30px */
+  --admin-font-size-4xl: 2.25rem;   /* 36px */
+
+  --admin-font-weight-normal: 400;
+  --admin-font-weight-medium: 500;
+  --admin-font-weight-semibold: 600;
+  --admin-font-weight-bold: 700;
+
+  --admin-line-height-tight: 1.25;
+  --admin-line-height-normal: 1.5;
+  --admin-line-height-relaxed: 1.75;
+
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
+  --admin-radius-sm: 4px;
+  --admin-radius-base: 8px;
+  --admin-radius-lg: 12px;
+  --admin-radius-xl: 16px;
+  --admin-radius-2xl: 20px;
+  --admin-radius-full: 9999px;
+
+  /* ============================================
+     SHADOWS
+     ============================================ */
+  --admin-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --admin-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --admin-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --admin-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --admin-shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+
+  /* ============================================
+     Z-INDEX SCALE
+     ============================================ */
+  --admin-z-base: 1;
+  --admin-z-dropdown: 1000;
+  --admin-z-sticky: 1020;
+  --admin-z-fixed: 1030;
+  --admin-z-modal-backdrop: 1040;
+  --admin-z-modal: 1050;
+  --admin-z-popover: 1060;
+  --admin-z-tooltip: 1070;
+
+  /* ============================================
+     TRANSITIONS
+     ============================================ */
+  --admin-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --admin-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --admin-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ============================================
+     CONTAINER WIDTHS
+     ============================================ */
+  --admin-container-sm: 640px;
+  --admin-container-md: 768px;
+  --admin-container-lg: 1024px;
+  --admin-container-xl: 1200px;
+  --admin-container-2xl: 1400px;
+}
+
+/* ============================================
+   DARK MODE OVERRIDES (Optional)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --admin-bg-body: #1a1d23;
+    --admin-bg-surface: #242830;
+    --admin-bg-elevated: #2d323a;
+
+    --admin-text-primary: #e9ecef;
+    --admin-text-secondary: #adb5bd;
+    --admin-text-tertiary: #6c757d;
+
+    --admin-border-color: #3d4451;
+    --admin-border-light: #2d323a;
+    --admin-border-dark: #495057;
+  }
+}

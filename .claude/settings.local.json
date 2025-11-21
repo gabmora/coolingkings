@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b /s supabase 2)",
+      "Bash(nul)",
+      "Bash(findstr:*)",
+      "Bash(find:*)",
+      "Bash(netstat:*)",
+      "Bash(npm install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

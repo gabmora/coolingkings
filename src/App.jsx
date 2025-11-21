@@ -2,14 +2,9 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import FrontPage from './components/FrontPage';
-import AboutUs from './components/AboutUs';
-import AC from './components/AC';
-import Heating from './components/Heating';
-import MaintenancePlan from './components/MaintenancePlan';
+import HomePage from './components/HomePage';
 import Header from './Header';
 import Footer from './Footer';
-import FreeEstimate from './components/FreeEstimate';
 
 // Import admin components
 import Dashboard from './components/admin/Dashboard';
@@ -43,13 +38,8 @@ const AppLayout = () => {
       {isAdminPage && !isAdminLogin && <AdminHeader />}
       <div className="main-content">
         <Routes>
-          {/* Public routes */}
-          <Route path="/MaintenancePlan" element={<MaintenancePlan />} />
-          <Route path="/AC" element={<AC />} />
-          <Route path="/Heating" element={<Heating />} />
-          <Route path="/AboutUs" element={<AboutUs />} />
-          <Route path="/estimate" element={<FreeEstimate />} />
-          <Route path="/*" element={<FrontPage />} />
+          {/* Public routes - Single Page */}
+          <Route path="/" element={<HomePage />} />
           
           {/* Admin routes (protected) */}
           <Route path="/admin/login" element={<AdminLogin />} />

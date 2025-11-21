@@ -841,12 +841,6 @@
   margin-bottom: 0.5rem;
 }
 
-.stat-label {
-  font-size: 1rem;
-  color: #e6f2ff;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
 /* Button styles */
 .button {

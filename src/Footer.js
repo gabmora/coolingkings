@@ -40,24 +40,26 @@ const Footer = () => {
           
           <div className="footer-links">
             <div className="footer-links-column">
-              <h3 className="footer-heading">Quick Links</h3>
-              <ul className="footer-list">
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/AC">Cooling</Link></li>
-                <li><Link to="/reviews">Reviews</Link></li>
-                <li><Link to="/AboutUs">About Us</Link></li>
-                <li><Link to="/service-areas">Service Areas</Link></li>
-              </ul>
-            </div>
-            
-            <div className="footer-links-column">
               <h3 className="footer-heading">Services</h3>
               <ul className="footer-list">
-                <li><Link to="/heating">Heating</Link></li>
-                <li><Link to="/MaintenancePlan">Maintenance Plan</Link></li>
-                <li><Link to="/admin">Careers</Link></li>
-                <li><Link to="/BookingPage">Contact</Link></li>
-                <li><Link to="/coupons">Coupons</Link></li>
+                <li>AC Installation & Repair</li>
+                <li>Heating Systems</li>
+                <li>Maintenance Plans</li>
+                <li>Emergency Service</li>
+                <li>Indoor Air Quality</li>
+
+                 <Link to="/admin/login" className="admin-link">Admin</Link>
+              </ul>
+            </div>
+
+            <div className="footer-links-column">
+              <h3 className="footer-heading">Service Areas</h3>
+              <ul className="footer-list">
+                <li>Bluffton, SC</li>
+                <li>Hilton Head, SC</li>
+                <li>Beaufort, SC</li>
+                <li>Savannah, GA</li>
+                <li>Low Country Region</li>
               </ul>
             </div>
           </div>
@@ -112,6 +114,7 @@ const Footer = () => {
           <div className="footer-bottom-links">
             <a href="/privacy">Privacy Policy</a>
             <a href="/terms">Terms of Service</a>
+           
           </div>
         </div>
       </div>

@@ -275,6 +275,15 @@
   color: white;
 }
 
+.footer-bottom-links .admin-link {
+  opacity: 0.5;
+  font-size: 0.75rem;
+}
+
+.footer-bottom-links .admin-link:hover {
+  opacity: 1;
+}
+
 /* Responsive Styles */
 @media (min-width: 768px) {
   .footer-main {
