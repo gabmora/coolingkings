@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getWorkOrdersByStatus } from '../../services/workOrderService';
 import { supabase } from '../../services/supabase';
+import './AdminDesignSystem.css';
+import './AdminComponents.css';
 import './AdminStyles.css';
 
 const Dashboard = () => {
@@ -157,161 +159,372 @@ const Dashboard = () => {
   return (
     <div className="admin-container">
       {loading ? (
-        <div className="loading">Loading dashboard data...</div>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '400px',
+          flexDirection: 'column',
+          gap: 'var(--admin-space-4)'
+        }}>
+          <div className="admin-loading-spinner"></div>
+          <p style={{ color: 'var(--admin-text-secondary)' }}>Loading dashboard data...</p>
+        </div>
       ) : (
         <>
+          {/* Page Header */}
+          <div style={{ marginBottom: 'var(--admin-space-8)' }}>
+            <h1 style={{
+              fontSize: 'var(--admin-font-size-4xl)',
+              fontWeight: 'var(--admin-font-weight-bold)',
+              color: 'var(--admin-text-primary)',
+              marginBottom: 'var(--admin-space-2)'
+            }}>
+              Dashboard
+            </h1>
+            <p style={{ color: 'var(--admin-text-secondary)' }}>
+              Welcome back! Here's your business overview for today.
+            </p>
+          </div>
+
           {/* Main Business Metrics */}
-          <div className="dashboard-stats">
-            <div className="stat-card">
-              <div className="stat-value">{pendingWorkOrders.length}</div>
-              <div className="stat-label">Pending Orders</div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 'var(--admin-space-6)',
+            marginBottom: 'var(--admin-space-8)'
+          }}>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">📋</div>
+              </div>
+              <div className="admin-stat-card-value">{pendingWorkOrders.length}</div>
+              <div className="admin-stat-card-label">Pending Orders</div>
             </div>
-            <div 
-              className="stat-card clickable" 
+            <div
+              className="admin-stat-card"
               onClick={toggleInProgressOrders}
               style={{ cursor: 'pointer' }}
             >
-              <div className="stat-value">{inProgressWorkOrders.length}</div>
-              <div className="stat-label">In Progress</div>
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">🔧</div>
+              </div>
+              <div className="admin-stat-card-value">{inProgressWorkOrders.length}</div>
+              <div className="admin-stat-card-label">In Progress</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{todaysWorkOrders.length}</div>
-              <div className="stat-label">Today's Schedule</div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">📅</div>
+              </div>
+              <div className="admin-stat-card-value">{todaysWorkOrders.length}</div>
+              <div className="admin-stat-card-label">Today's Schedule</div>
             </div>
-            <div 
-              className={`stat-card ${stats.urgentEstimates > 0 ? 'clickable urgent' : ''}`}
+            <div
+              className="admin-stat-card"
               onClick={() => stats.urgentEstimates > 0 && navigate('/admin/estimates?filter=urgent')}
               style={{ cursor: stats.urgentEstimates > 0 ? 'pointer' : 'default' }}
             >
-              <div className="stat-value">{stats.urgentEstimates}</div>
-              <div className="stat-label">Urgent Estimates</div>
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon" style={{
+                  background: stats.urgentEstimates > 0 ? 'linear-gradient(135deg, var(--admin-danger) 0%, var(--admin-status-urgent) 100%)' : undefined
+                }}>
+                  🚨
+                </div>
+              </div>
+              <div className="admin-stat-card-value">{stats.urgentEstimates}</div>
+              <div className="admin-stat-card-label">Urgent Estimates</div>
             </div>
           </div>
 
           {/* Lead Generation & AI Metrics */}
-          <div className="dashboard-stats">
-            <div 
-              className="stat-card clickable"
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 'var(--admin-space-6)',
+            marginBottom: 'var(--admin-space-8)'
+          }}>
+            <div
+              className="admin-stat-card"
               onClick={() => navigate('/admin/estimates')}
+              style={{ cursor: 'pointer' }}
             >
-              <div className="stat-value">{stats.pendingEstimates}</div>
-              <div className="stat-label">Pending Estimates</div>
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">💼</div>
+              </div>
+              <div className="admin-stat-card-value">{stats.pendingEstimates}</div>
+              <div className="admin-stat-card-label">Pending Estimates</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.todayConversations}</div>
-              <div className="stat-label">AI Chats Today</div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">💬</div>
+              </div>
+              <div className="admin-stat-card-value">{stats.todayConversations}</div>
+              <div className="admin-stat-card-label">AI Chats Today</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.weeklyLeads}</div>
-              <div className="stat-label">Leads This Week</div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">📈</div>
+              </div>
+              <div className="admin-stat-card-value">{stats.weeklyLeads}</div>
+              <div className="admin-stat-card-label">Leads This Week</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.completedThisMonth}</div>
-              <div className="stat-label">Completed This Month</div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">✅</div>
+              </div>
+              <div className="admin-stat-card-value">{stats.completedThisMonth}</div>
+              <div className="admin-stat-card-label">Completed This Month</div>
             </div>
           </div>
 
           {/* Secondary Stats Row */}
-          <div className="dashboard-stats">
-            <div className="stat-card">
-              <div className="stat-value">{stats.totalCustomers}</div>
-              <div className="stat-label">Total Customers</div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 'var(--admin-space-6)',
+            marginBottom: 'var(--admin-space-8)'
+          }}>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">👥</div>
+              </div>
+              <div className="admin-stat-card-value">{stats.totalCustomers}</div>
+              <div className="admin-stat-card-label">Total Customers</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.totalWorkOrders}</div>
-              <div className="stat-label">Total Work Orders</div>
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">📊</div>
+              </div>
+              <div className="admin-stat-card-value">{stats.totalWorkOrders}</div>
+              <div className="admin-stat-card-label">Total Work Orders</div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">🎯</div>
+              </div>
+              <div className="admin-stat-card-value">
                 {stats.weeklyLeads > 0 ? Math.round((stats.pendingEstimates / stats.weeklyLeads) * 100) : 0}%
               </div>
-              <div className="stat-label">Conversion Rate</div>
+              <div className="admin-stat-card-label">Conversion Rate</div>
+              <div className="admin-stat-card-change positive">
+                {stats.weeklyLeads > 0 ? `${stats.pendingEstimates} of ${stats.weeklyLeads} leads` : 'No data'}
+              </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">
+            <div className="admin-stat-card">
+              <div className="admin-stat-card-header">
+                <div className="admin-stat-card-icon">💡</div>
+              </div>
+              <div className="admin-stat-card-value">
                 {stats.todayConversations > 0 ? Math.round((stats.pendingEstimates / stats.todayConversations) * 100) : 0}%
               </div>
-              <div className="stat-label">Chat Conversion</div>
+              <div className="admin-stat-card-label">Chat Conversion</div>
+              <div className="admin-stat-card-change positive">
+                {stats.todayConversations > 0 ? `${stats.pendingEstimates} of ${stats.todayConversations} chats` : 'No data'}
+              </div>
             </div>
           </div>
-          
-          {/* Quick Actions - Updated with AI focus */}
-          <div className="dashboard-actions">
-            <Link to="/admin/calendar" className="action-button">
-              <span className="action-icon">📅</span>
-              <span>Schedule Jobs</span>
+
+          {/* Quick Actions */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 'var(--admin-space-4)',
+            marginBottom: 'var(--admin-space-8)'
+          }}>
+            <Link to="/admin/calendar" className="admin-btn admin-btn-primary" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: '1.25rem' }}>📅</span>
+              Schedule Jobs
             </Link>
-            <Link to="/admin/estimates" className="action-button">
-              <span className="action-icon">📋</span>
-              <span>Review Estimates</span>
+            <Link to="/admin/estimates" className="admin-btn admin-btn-secondary" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: '1.25rem' }}>📋</span>
+              Review Estimates
             </Link>
-            <Link to="/admin/workorders/new" className="action-button">
-              <span className="action-icon">+</span>
-              <span>New Work Order</span>
+            <Link to="/admin/workorders/new" className="admin-btn admin-btn-outline" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: '1.25rem' }}>+</span>
+              New Work Order
             </Link>
-            <Link to="/admin/customers/new" className="action-button">
-              <span className="action-icon">+</span>
-              <span>New Customer</span>
+            <Link to="/admin/customers/new" className="admin-btn admin-btn-outline" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: '1.25rem' }}>+</span>
+              New Customer
             </Link>
           </div>
 
           {/* In Progress Work Orders - Show only when clicked */}
           {showInProgressOrders && (
-            <div className="dashboard-section">
-              <div className="section-header">
-                <h2>In Progress Work Orders</h2>
-                <Link to="/admin/workorders?status=in-progress" className="btn btn-text">
-                  View All
+            <div style={{ marginBottom: 'var(--admin-space-8)' }}>
+              <div className="admin-card">
+                <div className="admin-card-header">
+                  <h3 className="admin-card-title">In Progress Work Orders</h3>
+                  <Link to="/admin/workorders?status=in-progress" className="admin-btn admin-btn-ghost admin-btn-sm" style={{ textDecoration: 'none' }}>
+                    View All
+                  </Link>
+                </div>
+
+                <div className="admin-card-body">
+                  {inProgressWorkOrders.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: 'var(--admin-space-8)',
+                      color: 'var(--admin-text-secondary)'
+                    }}>
+                      <p>No work orders in progress.</p>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--admin-space-4)' }}>
+                      {inProgressWorkOrders.slice(0, 5).map(order => (
+                        <div key={order.id} style={{
+                          padding: 'var(--admin-space-4)',
+                          border: '1px solid var(--admin-border-light)',
+                          borderRadius: 'var(--admin-radius-base)',
+                          transition: 'all var(--admin-transition-fast)'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            marginBottom: 'var(--admin-space-3)'
+                          }}>
+                            <div>
+                              <h4 style={{
+                                fontSize: 'var(--admin-font-size-lg)',
+                                fontWeight: 'var(--admin-font-weight-semibold)',
+                                color: 'var(--admin-text-primary)',
+                                margin: 0
+                              }}>{order.title}</h4>
+                              {order.work_order_number && (
+                                <p style={{
+                                  margin: 'var(--admin-space-1) 0 0 0',
+                                  color: 'var(--admin-text-secondary)',
+                                  fontSize: 'var(--admin-font-size-sm)'
+                                }}>
+                                  {order.work_order_number}
+                                </p>
+                              )}
+                            </div>
+                            <span className="admin-badge admin-badge-inprogress">
+                              {formatDate(order.service_date)}
+                            </span>
+                          </div>
+                          <div style={{
+                            display: 'grid',
+                            gap: 'var(--admin-space-2)',
+                            marginBottom: 'var(--admin-space-4)',
+                            fontSize: 'var(--admin-font-size-sm)'
+                          }}>
+                            <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                              <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Customer:</span>
+                              <span style={{ color: 'var(--admin-text-primary)' }}>{order.customers.name}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                              <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Service Type:</span>
+                              <span style={{ color: 'var(--admin-text-primary)' }}>{order.service_type.charAt(0).toUpperCase() + order.service_type.slice(1)}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                              <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Started:</span>
+                              <span style={{ color: 'var(--admin-text-primary)' }}>{order.started_at ? new Date(order.started_at).toLocaleString() : 'N/A'}</span>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 'var(--admin-space-3)' }}>
+                            <button
+                              className="admin-btn admin-btn-primary admin-btn-sm"
+                              onClick={() => navigate(`/admin/workorders/${order.id}`)}
+                            >
+                              View Details
+                            </button>
+                            <button
+                              className="admin-btn admin-btn-secondary admin-btn-sm"
+                              onClick={() => navigate(`/admin/workorders/${order.id}`)}
+                            >
+                              Complete Job
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Today's Schedule */}
+          <div style={{ marginBottom: 'var(--admin-space-8)' }}>
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <h3 className="admin-card-title">Today's Schedule</h3>
+                <Link to="/admin/calendar" className="admin-btn admin-btn-ghost admin-btn-sm" style={{ textDecoration: 'none' }}>
+                  View Calendar
                 </Link>
               </div>
-              
-              <div className="card">
-                {inProgressWorkOrders.length === 0 ? (
-                  <div className="empty-state">
-                    <p>No work orders in progress.</p>
+
+              <div className="admin-card-body">
+                {todaysWorkOrders.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: 'var(--admin-space-8)',
+                    color: 'var(--admin-text-secondary)'
+                  }}>
+                    <p>No work orders scheduled for today.</p>
                   </div>
                 ) : (
-                  <div className="work-order-list">
-                    {inProgressWorkOrders.slice(0, 5).map(order => (
-                      <div key={order.id} className="work-order-item">
-                        <div className="work-order-header">
-                          <div>
-                            <h3>{order.title}</h3>
-                            {order.work_order_number && (
-                              <p style={{ margin: '0.25rem 0', color: '#666', fontSize: '0.85rem' }}>
-                                {order.work_order_number}
-                              </p>
-                            )}
-                          </div>
-                          <div className="date-badge">{formatDate(order.service_date)}</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--admin-space-4)' }}>
+                    {todaysWorkOrders.map(order => (
+                      <div key={order.id} style={{
+                        padding: 'var(--admin-space-4)',
+                        border: '1px solid var(--admin-border-light)',
+                        borderRadius: 'var(--admin-radius-base)',
+                        transition: 'all var(--admin-transition-fast)'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: 'var(--admin-space-3)'
+                        }}>
+                          <h4 style={{
+                            fontSize: 'var(--admin-font-size-lg)',
+                            fontWeight: 'var(--admin-font-weight-semibold)',
+                            color: 'var(--admin-text-primary)',
+                            margin: 0
+                          }}>{order.title}</h4>
+                          <span className={`admin-badge admin-badge-${order.status.toLowerCase().replace('-', '')}`}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </span>
                         </div>
-                        <div className="work-order-details">
-                          <div className="detail-row">
-                            <div className="detail-label">Customer:</div>
-                            <div className="detail-value">{order.customers.name}</div>
+                        <div style={{
+                          display: 'grid',
+                          gap: 'var(--admin-space-2)',
+                          marginBottom: 'var(--admin-space-4)',
+                          fontSize: 'var(--admin-font-size-sm)'
+                        }}>
+                          <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                            <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Customer:</span>
+                            <span style={{ color: 'var(--admin-text-primary)' }}>{order.customers.name}</span>
                           </div>
-                          <div className="detail-row">
-                            <div className="detail-label">Service Type:</div>
-                            <div className="detail-value">{order.service_type.charAt(0).toUpperCase() + order.service_type.slice(1)}</div>
+                          <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                            <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Time:</span>
+                            <span style={{ color: 'var(--admin-text-primary)' }}>{getTimeDisplay(order.time_preference)}</span>
                           </div>
-                          <div className="detail-row">
-                            <div className="detail-label">Started:</div>
-                            <div className="detail-value">{order.started_at ? new Date(order.started_at).toLocaleString() : 'N/A'}</div>
+                          <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                            <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Address:</span>
+                            <span style={{ color: 'var(--admin-text-primary)' }}>{order.customers.address}</span>
                           </div>
                         </div>
-                        <div className="work-order-actions">
-                          <button 
-                            className="btn btn-primary btn-sm" 
+                        <div style={{ display: 'flex', gap: 'var(--admin-space-3)' }}>
+                          <button
+                            className="admin-btn admin-btn-primary admin-btn-sm"
                             onClick={() => navigate(`/admin/workorders/${order.id}`)}
                           >
                             View Details
                           </button>
-                          <button 
-                            className="btn btn-success btn-sm"
-                            onClick={() => navigate(`/admin/workorders/${order.id}`)}
-                          >
-                            Complete Job
-                          </button>
+                          {order.status === 'pending' && (
+                            <button
+                              className="admin-btn admin-btn-secondary admin-btn-sm"
+                              onClick={() => navigate(`/admin/workorders/${order.id}`)}
+                            >
+                              Start Job
+                            </button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -319,120 +532,91 @@ const Dashboard = () => {
                 )}
               </div>
             </div>
-          )}
-          
-          {/* Today's Schedule */}
-          <div className="dashboard-section">
-            <div className="section-header">
-              <h2>Today's Schedule</h2>
-              <Link to="/admin/calendar" className="btn btn-text">
-                View Calendar
-              </Link>
-            </div>
-            
-            <div className="card">
-              {todaysWorkOrders.length === 0 ? (
-                <div className="empty-state">
-                  <p>No work orders scheduled for today.</p>
-                </div>
-              ) : (
-                <div className="work-order-list">
-                  {todaysWorkOrders.map(order => (
-                    <div key={order.id} className="work-order-item">
-                      <div className="work-order-header">
-                        <h3>{order.title}</h3>
-                        <span className={`badge ${getStatusClass(order.status)}`}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </span>
-                      </div>
-                      <div className="work-order-details">
-                        <div className="detail-row">
-                          <div className="detail-label">Customer:</div>
-                          <div className="detail-value">{order.customers.name}</div>
+          </div>
+
+          {/* Pending Work Orders */}
+          <div style={{ marginBottom: 'var(--admin-space-8)' }}>
+            <div className="admin-card">
+              <div className="admin-card-header">
+                <h3 className="admin-card-title">Pending Work Orders</h3>
+                <Link to="/admin/workorders?status=pending" className="admin-btn admin-btn-ghost admin-btn-sm" style={{ textDecoration: 'none' }}>
+                  View All
+                </Link>
+              </div>
+
+              <div className="admin-card-body">
+                {pendingWorkOrders.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center',
+                    padding: 'var(--admin-space-8)',
+                    color: 'var(--admin-text-secondary)'
+                  }}>
+                    <p>No pending work orders.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--admin-space-4)' }}>
+                    {pendingWorkOrders.slice(0, 5).map(order => (
+                      <div key={order.id} style={{
+                        padding: 'var(--admin-space-4)',
+                        border: '1px solid var(--admin-border-light)',
+                        borderRadius: 'var(--admin-radius-base)',
+                        transition: 'all var(--admin-transition-fast)'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          marginBottom: 'var(--admin-space-3)'
+                        }}>
+                          <div>
+                            <h4 style={{
+                              fontSize: 'var(--admin-font-size-lg)',
+                              fontWeight: 'var(--admin-font-weight-semibold)',
+                              color: 'var(--admin-text-primary)',
+                              margin: 0
+                            }}>{order.title}</h4>
+                            {order.work_order_number && (
+                              <p style={{
+                                margin: 'var(--admin-space-1) 0 0 0',
+                                color: 'var(--admin-text-secondary)',
+                                fontSize: 'var(--admin-font-size-sm)'
+                              }}>
+                                {order.work_order_number}
+                              </p>
+                            )}
+                          </div>
+                          <span className="admin-badge admin-badge-pending">
+                            {formatDate(order.service_date)}
+                          </span>
                         </div>
-                        <div className="detail-row">
-                          <div className="detail-label">Time:</div>
-                          <div className="detail-value">{getTimeDisplay(order.time_preference)}</div>
+                        <div style={{
+                          display: 'grid',
+                          gap: 'var(--admin-space-2)',
+                          marginBottom: 'var(--admin-space-4)',
+                          fontSize: 'var(--admin-font-size-sm)'
+                        }}>
+                          <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                            <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Customer:</span>
+                            <span style={{ color: 'var(--admin-text-primary)' }}>{order.customers.name}</span>
+                          </div>
+                          <div style={{ display: 'flex', gap: 'var(--admin-space-2)' }}>
+                            <span style={{ color: 'var(--admin-text-secondary)', fontWeight: 'var(--admin-font-weight-semibold)' }}>Service Type:</span>
+                            <span style={{ color: 'var(--admin-text-primary)' }}>{order.service_type.charAt(0).toUpperCase() + order.service_type.slice(1)}</span>
+                          </div>
                         </div>
-                        <div className="detail-row">
-                          <div className="detail-label">Address:</div>
-                          <div className="detail-value">{order.customers.address}</div>
-                        </div>
-                      </div>
-                      <div className="work-order-actions">
-                        <button 
-                          className="btn btn-primary btn-sm" 
-                          onClick={() => navigate(`/admin/workorders/${order.id}`)}
-                        >
-                          View Details
-                        </button>
-                        {order.status === 'pending' && (
-                          <button 
-                            className="btn btn-success btn-sm"
+                        <div style={{ display: 'flex', gap: 'var(--admin-space-3)' }}>
+                          <button
+                            className="admin-btn admin-btn-primary admin-btn-sm"
                             onClick={() => navigate(`/admin/workorders/${order.id}`)}
                           >
-                            Start Job
+                            View Details
                           </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Pending Work Orders */}
-          <div className="dashboard-section">
-            <div className="section-header">
-              <h2>Pending Work Orders</h2>
-              <Link to="/admin/workorders?status=pending" className="btn btn-text">
-                View All
-              </Link>
-            </div>
-            
-            <div className="card">
-              {pendingWorkOrders.length === 0 ? (
-                <div className="empty-state">
-                  <p>No pending work orders.</p>
-                </div>
-              ) : (
-                <div className="work-order-list">
-                  {pendingWorkOrders.slice(0, 5).map(order => (
-                    <div key={order.id} className="work-order-item">
-                      <div className="work-order-header">
-                        <div>
-                          <h3>{order.title}</h3>
-                          {order.work_order_number && (
-                            <p style={{ margin: '0.25rem 0', color: '#666', fontSize: '0.85rem' }}>
-                              {order.work_order_number}
-                            </p>
-                          )}
-                        </div>
-                        <div className="date-badge">{formatDate(order.service_date)}</div>
-                      </div>
-                      <div className="work-order-details">
-                        <div className="detail-row">
-                          <div className="detail-label">Customer:</div>
-                          <div className="detail-value">{order.customers.name}</div>
-                        </div>
-                        <div className="detail-row">
-                          <div className="detail-label">Service Type:</div>
-                          <div className="detail-value">{order.service_type.charAt(0).toUpperCase() + order.service_type.slice(1)}</div>
                         </div>
                       </div>
-                      <div className="work-order-actions">
-                        <button 
-                          className="btn btn-primary btn-sm" 
-                          onClick={() => navigate(`/admin/workorders/${order.id}`)}
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </>

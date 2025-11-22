@@ -12,7 +12,7 @@ import CustomerList from './components/admin/CustomerList';
 import CustomerForm from './components/admin/CustomerForm';
 import CustomerDetail from './components/admin/CustomerDetail';
 import WorkOrderList from './components/admin/WorkOrderList';
-import WorkOrderForm from './components/admin/WorkOrderForm';
+import ChecklistWorkOrderForm from './components/admin/ChecklistWorkOrderForm';
 import WorkOrderDetail from './components/admin/WorkOrderDetail';
 import AdminLogin from './components/admin/AdminLogin';
 import ProtectedRoute from './components/admin/ProtectedRoute';
@@ -84,7 +84,7 @@ const AppLayout = () => {
           
           <Route path="/admin/workorders/new" element={
             <ProtectedRoute>
-              <WorkOrderForm />
+              <ChecklistWorkOrderForm />
             </ProtectedRoute>
           } />
           

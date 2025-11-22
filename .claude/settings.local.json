@@ -6,7 +6,8 @@
       "Bash(findstr:*)",
       "Bash(find:*)",
       "Bash(netstat:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
